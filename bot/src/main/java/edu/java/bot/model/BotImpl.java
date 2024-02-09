@@ -8,9 +8,11 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import com.pengrad.telegrambot.response.BaseResponse;
+import edu.java.bot.command.CommandsList;
 import edu.java.bot.handler.MessageProcessor;
 import edu.java.bot.handler.TelegramBotMessageProcessor;
 import java.util.List;
+
 
 public class BotImpl implements Bot {
     private final TelegramBot bot;
@@ -39,12 +41,7 @@ public class BotImpl implements Bot {
 
     @Override
     public void start() {
-        bot.execute(new SetMyCommands(
-            new BotCommand("/help", "This command returns list of commands"),
-            new BotCommand("/start", "This command registers new user"),
-            new BotCommand("/list", "This command returns list of tracks"),
-            new BotCommand("/track", "This command tracks some link"),
-            new BotCommand("/untrack", "This command untracks some link")));
+        bot.execute(new SetMyCommands(CommandsList.mapToBotCommands().toArray(new BotCommand[0])));
         bot.setUpdatesListener(updates -> {
             process(updates);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -55,6 +52,5 @@ public class BotImpl implements Bot {
     public void close() {
         bot.removeGetUpdatesListener();
     }
-
 
 }

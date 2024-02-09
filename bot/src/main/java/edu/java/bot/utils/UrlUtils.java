@@ -3,6 +3,7 @@ package edu.java.bot.utils;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class UrlUtils {
     private static final int DOMAIN_SEPARATOR = 3;
     private static final int RESOURCE_BEGIN = 4;

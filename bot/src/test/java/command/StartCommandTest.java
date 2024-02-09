@@ -10,6 +10,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.command.StartCommand;
 import org.junit.jupiter.api.Test;
 
+
 public class StartCommandTest {
 
     @Test
@@ -27,7 +28,6 @@ public class StartCommandTest {
         Chat chat = mock(Chat.class);
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
-
 
         StartCommand startCommand = new StartCommand();
 

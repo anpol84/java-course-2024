@@ -11,16 +11,14 @@ import edu.java.bot.command.Command;
 import edu.java.bot.command.ListCommand;
 import edu.java.bot.dao.LinkDao;
 import org.junit.jupiter.api.Test;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+
+
 public class ListCommandTest {
 
     @Test
     public void testHandleNoLinks() {
-        LinkDao linkDao = mock(LinkDao.class);
-        when(linkDao.getResources()).thenReturn(new HashMap<>());
+        LinkDao linkDao = new LinkDao();
 
         Update update = mock(Update.class);
         Message message = mock(Message.class);
@@ -39,13 +37,9 @@ public class ListCommandTest {
     @Test
     public void testHandleWithLinks() {
 
-        LinkDao linkDao = mock(LinkDao.class);
-        Map<String, Set<String>> links = new HashMap<>();
-        Set<String> resources = new HashSet<>();
-        resources.add("resource1");
-        resources.add("resource2");
-        links.put("domain1", resources);
-        when(linkDao.getResources()).thenReturn(links);
+        LinkDao linkDao = new LinkDao();
+        linkDao.addResource(123456789L, "domain1","resource1" );
+        linkDao.addResource(123456789L, "domain1","resource2" );
 
         Update update = mock(Update.class);
         Message message = mock(Message.class);
@@ -64,14 +58,14 @@ public class ListCommandTest {
 
     @Test
     public void testCommand() {
-        LinkDao linkDao = mock(LinkDao.class);
+        LinkDao linkDao = new LinkDao();
         Command command = new ListCommand(linkDao);
         assertEquals("/list", command.command());
     }
 
     @Test
     public void testDescription() {
-        LinkDao linkDao = mock(LinkDao.class);
+        LinkDao linkDao = new LinkDao();
         Command command = new ListCommand(linkDao);
         assertEquals("This command returns list of tracks", command.getDescription());
     }

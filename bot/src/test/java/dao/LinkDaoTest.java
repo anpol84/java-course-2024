@@ -6,15 +6,16 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.Set;
 
+
 public class LinkDaoTest {
 
     @Test
     void testAddResourceAndGetResources() {
         LinkDao linkDao = new LinkDao();
-        linkDao.addResource("github.com", "/example");
-        linkDao.addResource("stackoverflow.com", "/questions");
+        linkDao.addResource(123456789L,"github.com", "/example");
+        linkDao.addResource(123456789L, "stackoverflow.com", "/questions");
 
-        Map<String, Set<String>> resources = linkDao.getResources();
+        Map<String, Set<String>> resources = linkDao.getResources().get(123456789L);
 
         assertThat(resources).containsKeys("github.com", "stackoverflow.com");
         assertThat(resources.get("github.com")).containsExactly("/example");
@@ -24,13 +25,13 @@ public class LinkDaoTest {
     @Test
     void testDeleteResource() {
         LinkDao linkDao = new LinkDao();
-        linkDao.addResource("github.com", "/example");
-        linkDao.addResource("stackoverflow.com", "/questions");
+        linkDao.addResource(123456789L, "github.com", "/example");
+        linkDao.addResource(123456789L, "stackoverflow.com", "/questions");
 
-        assertThat(linkDao.deleteResource("github.com", "/example")).isTrue();
-        assertThat(linkDao.deleteResource("stackoverflow.com", "/questions")).isTrue();
-        assertThat(linkDao.deleteResource("github.com", "/invalid")).isFalse();
+        assertThat(linkDao.deleteResource(123456789L, "github.com", "/example")).isTrue();
+        assertThat(linkDao.deleteResource(123456789L, "stackoverflow.com", "/questions")).isTrue();
+        assertThat(linkDao.deleteResource(123456789L, "github.com", "/invalid")).isFalse();
 
-        assertThat(linkDao.getResources()).isEmpty();
+        assertThat(linkDao.getResources().get(123456789L)).isEmpty();
     }
 }

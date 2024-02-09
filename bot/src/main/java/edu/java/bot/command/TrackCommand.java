@@ -5,7 +5,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.dao.LinkDao;
 import edu.java.bot.utils.UrlUtils;
 
-public class TrackCommand implements TrackingCommand {
+
+public class TrackCommand implements Command {
     private final LinkDao linkDao;
 
     public TrackCommand(LinkDao linkDao) {
@@ -23,15 +24,27 @@ public class TrackCommand implements TrackingCommand {
         if (!UrlUtils.isValidUrl(message)) {
             return new SendMessage(update.message().chat().id(), "It is not valid link");
         }
-        linkDao.addResource(UrlUtils.getDomain(message), UrlUtils.getPath(message));
+        linkDao.addResource(update.message().chat().id(),
+            UrlUtils.getDomain(message), UrlUtils.getPath(message));
         return new SendMessage(update.message().chat().id(), "The resource has been added");
 
+    }
+
+    @Override
+    public boolean supports(Update update) {
+        if (update.message() == null || update.message().text() == null) {
+            return false;
+        }
+        String[] array = update.message().text().split(" ");
+        if (array.length != 2 || !array[0].equals(command())) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String getDescription() {
         return "This command tracks some link";
     }
-
 
 }

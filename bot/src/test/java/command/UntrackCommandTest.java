@@ -1,9 +1,11 @@
 package command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.pengrad.telegrambot.model.Chat;
@@ -13,12 +15,13 @@ import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.command.UntrackCommand;
 import edu.java.bot.dao.LinkDao;
 import org.junit.jupiter.api.Test;
+;
 
 public class UntrackCommandTest {
 
     @Test
     public void testCommand() {
-        UntrackCommand untrackCommand = new UntrackCommand(mock(LinkDao.class));
+        UntrackCommand untrackCommand = new UntrackCommand(new LinkDao());
 
         assertEquals(untrackCommand.command(), "/untrack");
     }
@@ -26,7 +29,7 @@ public class UntrackCommandTest {
     @Test
     public void testHandleInvalidUrl() {
 
-        LinkDao linkDao = mock(LinkDao.class);
+        LinkDao linkDao = spy(new LinkDao());
         Update update = mock(Update.class);
         Message message = mock(Message.class);
         when(update.message()).thenReturn(message);
@@ -41,14 +44,14 @@ public class UntrackCommandTest {
 
         assertEquals(sendMessage.getParameters().get("text"), "It is not valid link");
 
-        verify(linkDao, never()).deleteResource(anyString(), anyString());
+        verify(linkDao, never()).deleteResource(anyLong(), anyString(), anyString());
     }
 
     @Test
     public void testHandleValidUrlNotFound() {
 
-        LinkDao linkDao = mock(LinkDao.class);
-        when(linkDao.deleteResource(anyString(), anyString())).thenReturn(false);
+        LinkDao linkDao = spy(new LinkDao());
+        when(linkDao.deleteResource(anyLong(), anyString(), anyString())).thenReturn(false);
 
         Update update = mock(Update.class);
         Message message = mock(Message.class);
@@ -64,14 +67,14 @@ public class UntrackCommandTest {
 
         assertEquals(sendMessage.getParameters().get("text"), "There is no such resource");
 
-        verify(linkDao).deleteResource("http://stackoverflow.com", "questions");
+        verify(linkDao).deleteResource(123456789L, "http://stackoverflow.com", "questions");
     }
 
     @Test
     public void testHandleValidUrlDeleted() {
 
-        LinkDao linkDao = mock(LinkDao.class);
-        when(linkDao.deleteResource(anyString(), anyString())).thenReturn(true);
+        LinkDao linkDao = spy(new LinkDao());
+        when(linkDao.deleteResource(anyLong(), anyString(), anyString())).thenReturn(true);
 
         Update update = mock(Update.class);
         Message message = mock(Message.class);
@@ -87,13 +90,13 @@ public class UntrackCommandTest {
 
         assertEquals(sendMessage.getParameters().get("text"), "The resource has been deleted");
 
-        verify(linkDao).deleteResource("http://stackoverflow.com", "questions");
+        verify(linkDao).deleteResource(123456789L,"http://stackoverflow.com", "questions");
     }
 
     @Test
     public void testDescription() {
 
-        UntrackCommand untrackCommand = new UntrackCommand(mock(LinkDao.class));
+        UntrackCommand untrackCommand = new UntrackCommand(new LinkDao());
 
         assertEquals(untrackCommand.getDescription(), "This command untracks some link");
     }

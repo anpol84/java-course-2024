@@ -6,6 +6,7 @@ import edu.java.bot.dao.LinkDao;
 import java.util.Map;
 import java.util.Set;
 
+
 public class ListCommand implements Command {
     private final LinkDao linkDao;
 
@@ -21,9 +22,11 @@ public class ListCommand implements Command {
     @Override
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
-
-        Map<String, Set<String>> domainsAndResources = linkDao.getResources();
-
+        String noLinks = "At the moment, no links are being tracked.";
+        Map<String, Set<String>> domainsAndResources = linkDao.getResources().get(chatId);
+        if (domainsAndResources == null) {
+            return new SendMessage(chatId, noLinks);
+        }
         StringBuilder message = new StringBuilder("Here is the list of domains and resources:\n");
         boolean isNotEmptyDomains = false;
         for (Map.Entry<String, Set<String>> entry : domainsAndResources.entrySet()) {
@@ -33,8 +36,8 @@ public class ListCommand implements Command {
                 isNotEmptyDomains = true;
             }
         }
-        if (!isNotEmptyDomains || domainsAndResources.isEmpty()) {
-            return new SendMessage(chatId, "At the moment, no links are being tracked.");
+        if (!isNotEmptyDomains) {
+            return new SendMessage(chatId, noLinks);
 
         }
         return new SendMessage(chatId, message.toString());

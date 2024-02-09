@@ -15,8 +15,8 @@ import edu.java.bot.handler.MessageProcessor;
 import edu.java.bot.handler.TelegramBotMessageProcessor;
 import org.junit.jupiter.api.Test;
 
-public class TelegramBotMessageProcessorTest {
 
+public class TelegramBotMessageProcessorTest {
 
     @Test
     public void testProcessUnknownCommand() {
@@ -116,6 +116,10 @@ public class TelegramBotMessageProcessorTest {
 
         assertNotNull(result);
         assertEquals("The resource has been added", result.getParameters().get("text"));
+
+        when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
+        messageProcessor.process(update);
+
     }
 
     @Test
