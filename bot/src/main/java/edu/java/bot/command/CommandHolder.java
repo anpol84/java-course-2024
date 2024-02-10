@@ -1,13 +1,15 @@
 package edu.java.bot.command;
 
-import com.pengrad.telegrambot.model.BotCommand;
+
 import edu.java.bot.dao.LinkDao;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-
-public class CommandsList {
+public class CommandHolder {
     private static final List<Command> COMMANDS;
+    private static final Map<String, Command> COMMAND_MAP;
 
     static {
         COMMANDS = new ArrayList<>();
@@ -17,22 +19,24 @@ public class CommandsList {
         COMMANDS.add(new ListCommand(linkDao));
         COMMANDS.add(new TrackCommand(linkDao));
         COMMANDS.add(new UntrackCommand(linkDao));
+
+        COMMAND_MAP = new HashMap<>();
+        for (Command command : COMMANDS) {
+            COMMAND_MAP.put(command.command(), command);
+        }
     }
 
-    private CommandsList() {
+    private CommandHolder() {
 
     }
 
-    public static List<? extends Command> getCommands() {
+    public static List<Command> getCommands() {
         return COMMANDS;
     }
 
-    public static List<BotCommand> mapToBotCommands() {
-        List<BotCommand> botCommands = new ArrayList<>();
-        for (Command command : COMMANDS) {
-            botCommands.add(new BotCommand(command.command(), command.getDescription()));
-        }
-        return botCommands;
+
+    public static Command getCommandByName(String commandName) {
+        return COMMAND_MAP.get(commandName);
     }
 
 }

@@ -35,7 +35,6 @@ public class HelpCommandTest {
                 "/list - This command returns list of tracks\n" +
                 "/track - This command tracks some link\n" +
                 "/untrack - This command untracks some link\n");
-
     }
 
     @Test

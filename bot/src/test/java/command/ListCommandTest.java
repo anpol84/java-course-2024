@@ -53,7 +53,6 @@ public class ListCommandTest {
 
         assertEquals(sendMessage.getParameters().get("text"),"Here is the list of domains and resources:\n" +
             "domain1:\ndomain1/resource2\ndomain1/resource1\n");
-
     }
 
     @Test

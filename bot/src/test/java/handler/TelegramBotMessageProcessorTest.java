@@ -119,7 +119,6 @@ public class TelegramBotMessageProcessorTest {
 
         when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
         messageProcessor.process(update);
-
     }
 
     @Test
@@ -156,6 +155,5 @@ public class TelegramBotMessageProcessorTest {
         verify(messageProcessor).process(update);
 
         assertNull(result);
-
     }
 }

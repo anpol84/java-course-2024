@@ -27,7 +27,6 @@ public class TrackCommand implements Command {
         linkDao.addResource(update.message().chat().id(),
             UrlUtils.getDomain(message), UrlUtils.getPath(message));
         return new SendMessage(update.message().chat().id(), "The resource has been added");
-
     }
 
     @Override

@@ -38,7 +38,6 @@ public class ListCommand implements Command {
         }
         if (!isNotEmptyDomains) {
             return new SendMessage(chatId, noLinks);
-
         }
         return new SendMessage(chatId, message.toString());
     }

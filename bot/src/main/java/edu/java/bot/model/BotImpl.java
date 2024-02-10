@@ -8,9 +8,11 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import com.pengrad.telegrambot.response.BaseResponse;
-import edu.java.bot.command.CommandsList;
+import edu.java.bot.command.Command;
+import edu.java.bot.command.CommandHolder;
 import edu.java.bot.handler.MessageProcessor;
 import edu.java.bot.handler.TelegramBotMessageProcessor;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,7 +43,7 @@ public class BotImpl implements Bot {
 
     @Override
     public void start() {
-        bot.execute(new SetMyCommands(CommandsList.mapToBotCommands().toArray(new BotCommand[0])));
+        bot.execute(new SetMyCommands(mapToBotCommands(CommandHolder.getCommands()).toArray(new BotCommand[0])));
         bot.setUpdatesListener(updates -> {
             process(updates);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -51,6 +53,14 @@ public class BotImpl implements Bot {
     @Override
     public void close() {
         bot.removeGetUpdatesListener();
+    }
+
+    public static List<BotCommand> mapToBotCommands(List<Command> commands) {
+        List<BotCommand> botCommands = new ArrayList<>();
+        for (Command command : commands) {
+            botCommands.add(new BotCommand(command.command(), command.getDescription()));
+        }
+        return botCommands;
     }
 
 }

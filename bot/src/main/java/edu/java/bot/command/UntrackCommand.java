@@ -29,7 +29,6 @@ public class UntrackCommand implements Command {
             return new SendMessage(update.message().chat().id(), "The resource has been deleted");
         }
         return new SendMessage(update.message().chat().id(), "There is no such resource");
-
     }
 
     @Override
