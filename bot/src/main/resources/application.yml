@@ -1,7 +1,10 @@
 app:
-  telegram-token: unset
+  telegram-token: ${TELEGRAM_TOKEN}
+
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: bot
   jackson:
