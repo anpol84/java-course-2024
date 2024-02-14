@@ -15,6 +15,7 @@ logging:
   config: classpath:log4j2-plain.xml
 
 api:
-  baseurl:
-    stackoverflow: https://api.stackexchange.com/2.3/questions/
-    github: https://api.github.com/networks/
+  stackoverflow:
+    baseurl: https://api.stackexchange.com/2.3/
+  github:
+    baseurl: https://api.github.com/
