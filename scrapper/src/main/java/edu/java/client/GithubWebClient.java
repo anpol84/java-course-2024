@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 
 public class GithubWebClient implements GithubClient {
-    @Value(value = "api.github.baseurl")
+    @Value(value = "${api.github.baseurl}")
     private String baseurl;
 
     private final WebClient webClient;

@@ -6,25 +6,21 @@ import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GithubResponse {
-    @JsonProperty("id")
+
     private Long id;
 
-    @JsonProperty("type")
     private String type;
 
     @JsonProperty("actor")
     private Author author;
 
-    @JsonProperty("repo")
     private Repo repo;
 
     @JsonProperty("created_at")

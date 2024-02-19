@@ -15,7 +15,15 @@ logging:
   config: classpath:log4j2-plain.xml
 
 api:
+  scrapper:
+    baseurl: http://localhost:8080
+  bot:
+    baseurl: http://localhost:8080
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
   github:
     baseurl: https://api.github.com/
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui

@@ -1,7 +1,4 @@
-package edu.java.scrapper;
-
-
-
+package edu.java.scrapper.client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -28,7 +25,6 @@ public class GithubWebClientTest {
     private WireMockServer wireMockServer;
 
     private GithubClient githubClient;
-
 
     @BeforeEach
     void setUp() {

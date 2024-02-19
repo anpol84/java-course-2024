@@ -6,13 +6,11 @@ import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackOverflowResponse {
     @JsonProperty("question_id")
@@ -21,10 +19,8 @@ public class StackOverflowResponse {
     @JsonProperty("answer_id")
     private Long answerId;
 
-    @JsonProperty("owner")
     private Owner owner;
 
-    @JsonProperty("body")
     private String body;
 
     @JsonProperty("last_activity_date")

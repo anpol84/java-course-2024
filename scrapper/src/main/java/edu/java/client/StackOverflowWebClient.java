@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 public class StackOverflowWebClient implements StackOverflowClient {
 
-    @Value(value = "api.stackoverflow.baseurl")
+    @Value(value = "${api.stackoverflow.baseurl}")
     private String baseurl;
 
     private final WebClient webClient;
@@ -59,5 +59,4 @@ public class StackOverflowWebClient implements StackOverflowClient {
             return null;
         }
     }
-
 }
