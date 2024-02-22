@@ -19,6 +19,9 @@ public class StackOverflowWebClient implements StackOverflowClient {
     private final WebClient webClient;
 
     public StackOverflowWebClient() {
+        if (baseurl == null) {
+            baseurl = "https://api.stackexchange.com/2.3/";
+        }
         this.webClient = WebClient.builder().baseUrl(baseurl).build();
     }
 
@@ -27,6 +30,7 @@ public class StackOverflowWebClient implements StackOverflowClient {
         if (baseUrl.isEmpty()) {
             validatedBaseurl = this.baseurl;
         }
+        this.baseurl = validatedBaseurl;
         this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
     }
 

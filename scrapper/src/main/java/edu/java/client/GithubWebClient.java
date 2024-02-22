@@ -17,6 +17,9 @@ public class GithubWebClient implements GithubClient {
     private final WebClient webClient;
 
     public GithubWebClient() {
+        if (baseurl == null) {
+            baseurl = "https://api.github.com/";
+        }
         this.webClient = WebClient.builder().baseUrl(baseurl).build();
     }
 
@@ -25,6 +28,7 @@ public class GithubWebClient implements GithubClient {
         if (baseUrl.isEmpty()) {
             validatedBaseurl = this.baseurl;
         }
+        this.baseurl = validatedBaseurl;
         this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
     }
 

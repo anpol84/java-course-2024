@@ -1,10 +1,8 @@
 package edu.java.service;
 
-import edu.java.dto.LinkResponse;
-import edu.java.exception.ChatAlreadyExistException;
-import edu.java.exception.ChatNotExistException;
-import edu.java.exception.LinkAlreadyExistException;
-import edu.java.exception.LinkNotExistException;
+import edu.java.common.exception.BadRequestException;
+import edu.java.common.exception.NotFoundException;
+import edu.java.common.responseDto.LinkResponse;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,38 +13,39 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ScrapperService {
+
     private final Map<Long, List<LinkResponse>> chatLinksMap = new HashMap<>();
     private final static String CHAT_NOT_EXIST = "Такого чата не существует";
 
     public void registerChat(Long chatId) {
         if (chatLinksMap.containsKey(chatId)) {
-            throw new ChatAlreadyExistException("Чат уже зарегистрирован");
+            throw new BadRequestException("Чат уже зарегистрирован", "Повторная регистрация чата невозможна");
         }
         chatLinksMap.put(chatId, new ArrayList<>());
     }
 
     public void deleteChat(Long chatId) {
         if (!chatLinksMap.containsKey(chatId)) {
-            throw new ChatNotExistException(CHAT_NOT_EXIST);
+            throw new NotFoundException(CHAT_NOT_EXIST, "Удаление несуществующего чата невозможно");
         }
         chatLinksMap.remove(chatId);
     }
 
     public List<LinkResponse> getLinks(Long chatId) {
         if (!chatLinksMap.containsKey(chatId)) {
-            throw new ChatNotExistException(CHAT_NOT_EXIST);
+            throw new NotFoundException(CHAT_NOT_EXIST, "Обращение к несуществующему чату невозможно");
         }
         return chatLinksMap.get(chatId);
     }
 
     public LinkResponse addLink(Long chatId, URI link) {
         if (!chatLinksMap.containsKey(chatId)) {
-            throw new ChatNotExistException(CHAT_NOT_EXIST);
+            throw new NotFoundException(CHAT_NOT_EXIST, "Добавление ссылки в несуществующий чат невозможно");
         }
         List<LinkResponse> links = chatLinksMap.get(chatId);
         for (LinkResponse item : links) {
             if (item.getUrl().getPath().equals(link.getPath())) {
-                throw new LinkAlreadyExistException("Ссылка уже существует");
+                throw new BadRequestException("Ссылка уже существует", "Повторное добавление ссылки невозможно");
             }
         }
         LinkResponse linkResponse = new LinkResponse((long) (links.size() + 1), link);
@@ -56,7 +55,7 @@ public class ScrapperService {
 
     public LinkResponse removeLink(Long chatId, URI link) {
         if (!chatLinksMap.containsKey(chatId)) {
-            throw new ChatNotExistException(CHAT_NOT_EXIST);
+            throw new NotFoundException(CHAT_NOT_EXIST, "Удаление ссылки из несуществующего чата невозможно");
         }
         List<LinkResponse> links = chatLinksMap.get(chatId);
         for (LinkResponse response : links) {
@@ -65,6 +64,6 @@ public class ScrapperService {
                 return response;
             }
         }
-        throw new LinkNotExistException("Ссылки не существует");
+        throw new NotFoundException("Ссылки не существует", "Удаление несуществующей ссылки невозможно");
     }
 }

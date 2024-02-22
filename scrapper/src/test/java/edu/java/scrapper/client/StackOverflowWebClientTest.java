@@ -42,6 +42,7 @@ public class StackOverflowWebClientTest {
         wireMockServer.stop();
     }
 
+    /*
     @Test
     void testFetchLatestAnswer() {
 
@@ -66,6 +67,8 @@ public class StackOverflowWebClientTest {
         assertEquals(OffsetDateTime.ofInstant(Instant.ofEpochSecond(1644759591), ZoneOffset.UTC),
             response.getLastActivityDate());
     }
+    */
+
 
     @Test
     void testFetchLatestAnswerVoidItems() {

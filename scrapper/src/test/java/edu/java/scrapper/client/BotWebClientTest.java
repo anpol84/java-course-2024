@@ -3,8 +3,9 @@ package edu.java.scrapper.client;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.client.BotWebClient;
-import edu.java.dto.ApiErrorResponse;
-import edu.java.dto.LinkUpdateRequest;
+import edu.java.common.responseDto.ApiErrorResponse;
+import edu.java.common.requestDto.LinkUpdateRequest;
+import edu.java.common.exception.ApiErrorException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -52,9 +54,8 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Обновление обработано")));
 
-        Optional<?> response = botWebClient.sendUpdate(request);
+        Optional<String> response = botWebClient.sendUpdate(request);
         assertTrue(response.isPresent());
-        assertEquals(response.get().getClass(), String.class);
         assertEquals(response.get(), "Обновление обработано");
     }
 
@@ -83,14 +84,12 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(body)));
 
-        Optional<?> response = botWebClient.sendUpdate(request);
-        assertTrue(response.isPresent());
-        assertEquals(response.get().getClass(), ApiErrorResponse.class);
-        ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
+            () -> botWebClient.sendUpdate(request)).getErrorResponse();
+        assertEquals("some description", errorResponse.getDescription());
+        assertEquals("400", errorResponse.getCode());
+        assertEquals("Bad params", errorResponse.getExceptionName());
+        assertEquals("Some mistake", errorResponse.getExceptionMessage());
     }
 
     @Test
@@ -128,13 +127,11 @@ public class BotWebClientTest {
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(body)));
-        Optional<?> response = botWebClient.sendUpdate(request);
-        assertTrue(response.isPresent());
-        assertEquals(response.get().getClass(), ApiErrorResponse.class);
-        ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Double update");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
+            () -> botWebClient.sendUpdate(request)).getErrorResponse();
+        assertEquals("some description", errorResponse.getDescription());
+        assertEquals("400", errorResponse.getCode());
+        assertEquals("Double update", errorResponse.getExceptionName());
+        assertEquals("Some mistake", errorResponse.getExceptionMessage());
     }
 }

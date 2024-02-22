@@ -1,9 +1,11 @@
 package edu.java.client;
 
-import edu.java.dto.ApiErrorResponse;
-import edu.java.dto.LinkUpdateRequest;
+import edu.java.common.exception.ApiErrorException;
+import edu.java.common.requestDto.LinkUpdateRequest;
+import edu.java.common.responseDto.ApiErrorResponse;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,6 +19,9 @@ public class BotWebClient {
     private String baseurl;
 
     public BotWebClient() {
+        if (baseurl == null) {
+            baseurl = "http://localhost:8090";
+        }
         this.webClient = WebClient.builder().baseUrl(baseurl).build();
     }
 
@@ -25,22 +30,20 @@ public class BotWebClient {
         if (baseUrl.isEmpty()) {
             validatedBaseurl = this.baseurl;
         }
+        this.baseurl = validatedBaseurl;
         this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
+
     }
 
-    public Optional<?> sendUpdate(LinkUpdateRequest request) {
+    public Optional<String> sendUpdate(LinkUpdateRequest request) {
         return webClient.post()
             .uri("/updates")
             .body(BodyInserters.fromValue(request))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(String.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatus.BAD_REQUEST::equals, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(String.class)
             .blockOptional();
     }
 }

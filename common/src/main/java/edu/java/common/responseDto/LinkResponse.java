@@ -1,4 +1,4 @@
-package edu.java.dto;
+package edu.java.common.responseDto;
 
 import java.net.URI;
 import lombok.AllArgsConstructor;

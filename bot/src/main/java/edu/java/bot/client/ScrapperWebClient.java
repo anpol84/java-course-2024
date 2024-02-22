@@ -1,13 +1,15 @@
 package edu.java.bot.client;
 
-import edu.java.bot.dto.AddLinkRequest;
-import edu.java.bot.dto.ApiErrorResponse;
-import edu.java.bot.dto.LinkResponse;
-import edu.java.bot.dto.ListLinksResponse;
-import edu.java.bot.dto.RemoveLinkRequest;
+import edu.java.common.exception.ApiErrorException;
+import edu.java.common.requestDto.AddLinkRequest;
+import edu.java.common.requestDto.RemoveLinkRequest;
+import edu.java.common.responseDto.ApiErrorResponse;
+import edu.java.common.responseDto.LinkResponse;
+import edu.java.common.responseDto.ListLinksResponse;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -24,6 +26,9 @@ public class ScrapperWebClient {
     private final static String HEADER_NAME = "Tg-Chat-Id";
 
     public ScrapperWebClient() {
+        if (baseurl == null) {
+            baseurl = "http://localhost:8080";
+        }
         this.webClient = WebClient.builder().baseUrl(baseurl).build();
     }
 
@@ -32,86 +37,67 @@ public class ScrapperWebClient {
         if (baseUrl.isEmpty()) {
             validatedBaseurl = this.baseurl;
         }
+        this.baseurl = validatedBaseurl;
         this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
     }
 
-    public Optional<?> registerChat(Integer id) {
+    public Optional<String> registerChat(Integer id) {
         return webClient.post()
             .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(String.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(String.class)
             .blockOptional();
     }
 
-    public Optional<?> deleteChat(Integer id) {
+    public Optional<String> deleteChat(Integer id) {
         return webClient.delete()
             .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(String.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(String.class)
             .blockOptional();
     }
 
-    public Optional<?> getLinks(Integer id) {
+    public Optional<ListLinksResponse> getLinks(Integer id) {
         return webClient.get()
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(ListLinksResponse.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(ListLinksResponse.class)
             .blockOptional();
     }
 
-    public Optional<?> addLink(Integer id, AddLinkRequest request) {
+    public Optional<LinkResponse> addLink(Integer id, AddLinkRequest request) {
         return webClient.post()
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
             .body(BodyInserters.fromValue(request))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(LinkResponse.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(LinkResponse.class)
             .blockOptional();
     }
 
-    public Optional<?> removeLink(Integer id, RemoveLinkRequest request) {
+    public Optional<LinkResponse> removeLink(Integer id, RemoveLinkRequest request) {
         return webClient.method(HttpMethod.DELETE)
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
             .body(BodyInserters.fromValue(request))
-            .exchangeToMono(response -> {
-                if (response.statusCode().is2xxSuccessful()) {
-                    return response.bodyToMono(LinkResponse.class);
-                } else if (response.statusCode().is4xxClientError()) {
-                    return response.bodyToMono(ApiErrorResponse.class);
-                } else {
-                    return Mono.empty();
-                }
-            })
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
+                .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
+            )
+            .bodyToMono(LinkResponse.class)
             .blockOptional();
     }
 }
