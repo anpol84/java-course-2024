@@ -1,4 +1,4 @@
-package utlis;
+package utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import edu.java.bot.utils.UrlUtils;

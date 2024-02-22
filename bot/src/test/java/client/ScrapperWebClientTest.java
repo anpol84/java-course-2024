@@ -1,14 +1,15 @@
-package edu.java.scrapper.client;
+package client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import edu.java.client.ScrapperWebClient;
-import edu.java.dto.AddLinkRequest;
-import edu.java.dto.ApiErrorResponse;
-import edu.java.dto.LinkResponse;
-import edu.java.dto.ListLinksResponse;
-import edu.java.dto.RemoveLinkRequest;
+import edu.java.bot.client.ScrapperWebClient;
+import edu.java.bot.dto.AddLinkRequest;
+import edu.java.bot.dto.ApiErrorResponse;
+import edu.java.bot.dto.LinkResponse;
+import edu.java.bot.dto.ListLinksResponse;
+import edu.java.bot.dto.RemoveLinkRequest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -120,10 +121,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -147,10 +148,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Double query");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Double query");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -179,10 +180,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -196,10 +197,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "404");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "404");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -226,9 +227,9 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ListLinksResponse.class);
         ListLinksResponse listLinksResponse = (ListLinksResponse) response.get();
-        assertEquals(listLinksResponse.getSize(), 1);
-        assertEquals(listLinksResponse.getLinks().get(0).getId(), 1);
-        assertEquals(listLinksResponse.getLinks().get(0).getUrl().getPath(), "link1");
+        Assertions.assertEquals(listLinksResponse.getSize(), 1);
+        Assertions.assertEquals(listLinksResponse.getLinks().get(0).getId(), 1);
+        Assertions.assertEquals(listLinksResponse.getLinks().get(0).getUrl().getPath(), "link1");
     }
 
     @Test
@@ -244,10 +245,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -263,10 +264,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "404");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "404");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -282,8 +283,8 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), LinkResponse.class);
         LinkResponse linkResponse = (LinkResponse) response.get();
-        assertEquals(linkResponse.getId(), 1);
-        assertEquals(linkResponse.getUrl().getPath(), "123");
+        Assertions.assertEquals(linkResponse.getId(), 1);
+        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
     }
 
     @Test
@@ -299,10 +300,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -318,10 +319,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -337,10 +338,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "404");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "404");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -356,8 +357,8 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), LinkResponse.class);
         LinkResponse linkResponse = (LinkResponse) response.get();
-        assertEquals(linkResponse.getId(), 1);
-        assertEquals(linkResponse.getUrl().getPath(), "123");
+        Assertions.assertEquals(linkResponse.getId(), 1);
+        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
 
         wireMockServer.stubFor(post(urlEqualTo("/links"))
             .withHeader("Tg-Chat-Id", equalTo("1"))
@@ -370,10 +371,10 @@ public class ScrapperWebClientTest {
         assertTrue(response1.isPresent());
         assertEquals(response1.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response1.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -389,8 +390,8 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), LinkResponse.class);
         LinkResponse linkResponse = (LinkResponse) response.get();
-        assertEquals(linkResponse.getId(), 1);
-        assertEquals(linkResponse.getUrl().getPath(), "123");
+        Assertions.assertEquals(linkResponse.getId(), 1);
+        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
     }
 
     @Test
@@ -406,10 +407,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -425,10 +426,10 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "400");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "400");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Bad params");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 
     @Test
@@ -444,9 +445,9 @@ public class ScrapperWebClientTest {
         assertTrue(response.isPresent());
         assertEquals(response.get().getClass(), ApiErrorResponse.class);
         ApiErrorResponse apiErrorResponse = (ApiErrorResponse) response.get();
-        assertEquals(apiErrorResponse.getCode(), "404");
-        assertEquals(apiErrorResponse.getDescription(), "some description");
-        assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
-        assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
+        Assertions.assertEquals(apiErrorResponse.getCode(), "404");
+        Assertions.assertEquals(apiErrorResponse.getDescription(), "some description");
+        Assertions.assertEquals(apiErrorResponse.getExceptionName(), "Resource not found");
+        Assertions.assertEquals(apiErrorResponse.getExceptionMessage(), "Some mistake");
     }
 }

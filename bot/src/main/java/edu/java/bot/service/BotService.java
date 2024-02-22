@@ -1,7 +1,7 @@
-package edu.java.service;
+package edu.java.bot.service;
 
-import edu.java.dto.LinkUpdateRequest;
-import edu.java.exception.LinkAlreadyExistException;
+import edu.java.bot.dto.LinkUpdateRequest;
+import edu.java.bot.exception.UpdateAlreadyExistException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ public class BotService {
     public void addUpdate(LinkUpdateRequest linkUpdate) {
         for (LinkUpdateRequest request : updates) {
             if (request.getId().equals(linkUpdate.getId())) {
-                throw new LinkAlreadyExistException("Update уже существует");
+                throw new UpdateAlreadyExistException("Update уже существует");
             }
         }
         updates.add(linkUpdate);

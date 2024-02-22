@@ -15,10 +15,8 @@ logging:
   config: classpath:log4j2-plain.xml
 
 api:
-  scrapper:
-    baseurl: http://localhost:8080
   bot:
-    baseurl: http://localhost:8080
+    baseurl: http://localhost:8090
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
   github:

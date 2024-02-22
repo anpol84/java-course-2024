@@ -1,10 +1,10 @@
-package edu.java.client;
+package edu.java.bot.client;
 
-import edu.java.dto.AddLinkRequest;
-import edu.java.dto.ApiErrorResponse;
-import edu.java.dto.LinkResponse;
-import edu.java.dto.ListLinksResponse;
-import edu.java.dto.RemoveLinkRequest;
+import edu.java.bot.dto.AddLinkRequest;
+import edu.java.bot.dto.ApiErrorResponse;
+import edu.java.bot.dto.LinkResponse;
+import edu.java.bot.dto.ListLinksResponse;
+import edu.java.bot.dto.RemoveLinkRequest;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
