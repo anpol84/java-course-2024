@@ -1,17 +1,19 @@
 package edu.java.service;
 
-import edu.java.common.exception.BadRequestException;
-import edu.java.common.exception.NotFoundException;
-import edu.java.common.responseDto.LinkResponse;
+import edu.java.exception.BadRequestException;
+import edu.java.exception.NotFoundException;
+import edu.java.serviceDto.LinkResponse;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@RequiredArgsConstructor
 public class ScrapperService {
 
     private final Map<Long, List<LinkResponse>> chatLinksMap = new HashMap<>();

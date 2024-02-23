@@ -1,9 +1,9 @@
 package service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import edu.java.bot.serviceDto.LinkUpdateRequest;
+import edu.java.bot.exception.BadRequestException;
 import edu.java.bot.service.BotService;
-import edu.java.common.exception.BadRequestException;
-import edu.java.common.requestDto.LinkUpdateRequest;
 import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.net.URISyntaxException;

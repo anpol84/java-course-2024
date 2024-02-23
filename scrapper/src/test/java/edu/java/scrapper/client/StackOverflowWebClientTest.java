@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.client.StackOverflowClient;
 import edu.java.client.StackOverflowWebClient;
-import edu.java.dto.StackOverflowResponse;
+import edu.java.clientDto.StackOverflowResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,6 @@ public class StackOverflowWebClientTest {
         wireMockServer.stop();
     }
 
-    /*
     @Test
     void testFetchLatestAnswer() {
 
@@ -67,8 +66,6 @@ public class StackOverflowWebClientTest {
         assertEquals(OffsetDateTime.ofInstant(Instant.ofEpochSecond(1644759591), ZoneOffset.UTC),
             response.getLastActivityDate());
     }
-    */
-
 
     @Test
     void testFetchLatestAnswerVoidItems() {

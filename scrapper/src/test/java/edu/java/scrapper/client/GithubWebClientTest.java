@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.client.GithubClient;
 import edu.java.client.GithubWebClient;
-import edu.java.dto.GithubResponse;
+import edu.java.clientDto.GithubResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,6 @@ public class GithubWebClientTest {
     }
 
 
-    /*
     @Test
     public void testFetchLatestRepositoryActivity() {
         String repositoryName = "repo";
@@ -69,7 +68,7 @@ public class GithubWebClientTest {
         assertEquals(OffsetDateTime.ofInstant(Instant.ofEpochSecond(1644759591), ZoneOffset.UTC),
             response.getCreatedAt());
     }
-    */
+
 
 
 

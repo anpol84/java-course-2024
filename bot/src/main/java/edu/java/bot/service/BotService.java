@@ -1,7 +1,7 @@
 package edu.java.bot.service;
 
-import edu.java.common.exception.BadRequestException;
-import edu.java.common.requestDto.LinkUpdateRequest;
+import edu.java.bot.exception.BadRequestException;
+import edu.java.bot.serviceDto.LinkUpdateRequest;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
 package edu.java.bot.controller;
 
-import edu.java.common.exception.BadRequestException;
-import edu.java.common.responseDto.ApiErrorResponse;
-import edu.java.common.utils.StackTraceUtil;
+import edu.java.bot.clientDto.ApiErrorResponse;
+import edu.java.bot.exception.BadRequestException;
+import edu.java.bot.utils.StackTraceUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

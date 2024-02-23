@@ -1,7 +1,7 @@
 package edu.java.bot.controller;
 
 import edu.java.bot.service.BotService;
-import edu.java.common.requestDto.LinkUpdateRequest;
+import edu.java.bot.serviceDto.LinkUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

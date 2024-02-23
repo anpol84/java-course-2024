@@ -1,7 +1,6 @@
 package utils;
 
-
-import edu.java.common.utils.StackTraceUtil;
+import edu.java.bot.utils.StackTraceUtil;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +14,7 @@ public class StakeTraceUtilTest {
         List<String> stackTrace = StackTraceUtil.getStringStakeTrace(exception);
         assertThat(stackTrace).isNotEmpty();
         assertEquals(stackTrace.get(0),"utils.StakeTraceUtilTest.testGetStringStackTrace" +
-            "(StakeTraceUtilTest.java:14)" );
+            "(StakeTraceUtilTest.java:13)" );
 
     }
 }

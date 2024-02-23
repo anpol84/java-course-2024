@@ -3,33 +3,18 @@ package edu.java.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import edu.java.dto.GithubResponse;
+import edu.java.clientDto.GithubResponse;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
 public class GithubWebClient implements GithubClient {
-    @Value(value = "${api.github.baseurl}")
-    private String baseurl;
 
     private final WebClient webClient;
 
-    public GithubWebClient() {
-        if (baseurl == null) {
-            baseurl = "https://api.github.com/";
-        }
-        this.webClient = WebClient.builder().baseUrl(baseurl).build();
-    }
-
     public GithubWebClient(String baseUrl) {
-        String validatedBaseurl = baseUrl;
-        if (baseUrl.isEmpty()) {
-            validatedBaseurl = this.baseurl;
-        }
-        this.baseurl = validatedBaseurl;
-        this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
+        this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
     @Override

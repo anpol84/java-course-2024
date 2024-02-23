@@ -1,10 +1,10 @@
 package edu.java.controller;
 
-import edu.java.common.requestDto.AddLinkRequest;
-import edu.java.common.requestDto.RemoveLinkRequest;
-import edu.java.common.responseDto.LinkResponse;
-import edu.java.common.responseDto.ListLinksResponse;
 import edu.java.service.ScrapperService;
+import edu.java.serviceDto.AddLinkRequest;
+import edu.java.serviceDto.LinkResponse;
+import edu.java.serviceDto.ListLinksResponse;
+import edu.java.serviceDto.RemoveLinkRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import java.util.List;

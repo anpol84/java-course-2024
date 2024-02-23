@@ -1,9 +1,9 @@
 package edu.java.controller;
 
-import edu.java.common.exception.BadRequestException;
-import edu.java.common.exception.NotFoundException;
-import edu.java.common.responseDto.ApiErrorResponse;
-import edu.java.common.utils.StackTraceUtil;
+import edu.java.exception.BadRequestException;
+import edu.java.exception.NotFoundException;
+import edu.java.serviceDto.ApiErrorResponse;
+import edu.java.utils.StackTraceUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
 
 @RestControllerAdvice
 public class ScrapperExceptionController {
@@ -49,7 +50,6 @@ public class ScrapperExceptionController {
             ex.getMessage(),
             StackTraceUtil.getStringStakeTrace(ex));
     }
-
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

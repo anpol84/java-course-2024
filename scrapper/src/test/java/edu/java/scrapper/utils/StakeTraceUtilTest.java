@@ -2,7 +2,7 @@ package edu.java.scrapper.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import edu.java.common.utils.StackTraceUtil;
+import edu.java.utils.StackTraceUtil;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
@@ -15,6 +15,5 @@ public class StakeTraceUtilTest {
         assertThat(stackTrace).isNotEmpty();
         assertEquals(stackTrace.get(0),"edu.java.scrapper.utils.StakeTraceUtilTest.testGetStringStackTrace" +
             "(StakeTraceUtilTest.java:13)" );
-
     }
 }

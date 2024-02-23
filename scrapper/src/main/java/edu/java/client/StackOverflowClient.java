@@ -1,6 +1,6 @@
 package edu.java.client;
 
-import edu.java.dto.StackOverflowResponse;
+import edu.java.clientDto.StackOverflowResponse;
 import java.util.Optional;
 
 
