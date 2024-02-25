@@ -3,31 +3,25 @@ package edu.java.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import edu.java.dto.StackOverflowResponse;
+import edu.java.clientDto.StackOverflowResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
 public class StackOverflowWebClient implements StackOverflowClient {
 
-    @Value(value = "api.stackoverflow.baseurl")
-    private String baseurl;
-
     private final WebClient webClient;
+    private final static String DEFAULT_URL = "https://api.stackexchange.com/2.3/";
 
     public StackOverflowWebClient() {
-        this.webClient = WebClient.builder().baseUrl(baseurl).build();
+        this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
     }
 
     public StackOverflowWebClient(String baseUrl) {
-        String validatedBaseurl = baseUrl;
-        if (baseUrl.isEmpty()) {
-            validatedBaseurl = this.baseurl;
-        }
-        this.webClient = WebClient.builder().baseUrl(validatedBaseurl).build();
+
+        this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
     @Override
@@ -59,5 +53,4 @@ public class StackOverflowWebClient implements StackOverflowClient {
             return null;
         }
     }
-
 }

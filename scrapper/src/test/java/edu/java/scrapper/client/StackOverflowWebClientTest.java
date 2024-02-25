@@ -1,10 +1,10 @@
-package edu.java.scrapper;
+package edu.java.scrapper.client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import edu.java.client.StackOverflowClient;
 import edu.java.client.StackOverflowWebClient;
-import edu.java.dto.StackOverflowResponse;
+import edu.java.clientDto.StackOverflowResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

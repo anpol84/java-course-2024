@@ -108,7 +108,8 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -147,7 +148,11 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
+        </dependency>
 
     </dependencies>
 

@@ -1,6 +1,6 @@
 package edu.java.client;
 
-import edu.java.dto.GithubResponse;
+import edu.java.clientDto.GithubResponse;
 import java.util.Optional;
 
 
