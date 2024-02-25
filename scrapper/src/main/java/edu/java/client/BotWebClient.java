@@ -13,6 +13,11 @@ import reactor.core.publisher.Mono;
 public class BotWebClient {
 
     private final WebClient webClient;
+    private final static String DEFAULT_URL = "http://localhost:8090";
+
+    public BotWebClient() {
+        this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
+    }
 
     public BotWebClient(String baseUrl) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();

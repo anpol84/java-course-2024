@@ -17,9 +17,15 @@ import reactor.core.publisher.Mono;
 public class ScrapperWebClient {
     private final WebClient webClient;
 
+    private final static String DEFAULT_URL = "http://localhost:8080";
+
     private final static String PATH_TO_CHAT = "tg-chat/{id}";
     private final static String PATH_TO_LINK = "/links";
     private final static String HEADER_NAME = "Tg-Chat-Id";
+
+    public ScrapperWebClient() {
+        this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
+    }
 
     public ScrapperWebClient(String baseUrl) {
 
