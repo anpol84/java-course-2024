@@ -9,6 +9,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -20,9 +21,8 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 @Testcontainers
-public abstract class IntegrationTest {
+public class IntegrationTest {
     public static PostgreSQLContainer<?> POSTGRES;
 
     static  {
@@ -67,7 +67,9 @@ public abstract class IntegrationTest {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
 
-    public static void main(String[] args) {
+
+    @Test
+    public void simpleTest() {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSourceBuilder
             .create()
