@@ -3,6 +3,8 @@ app:
 
 
 spring:
+  main:
+    allow-circular-references: true
   config:
     import: optional:file:.env[.properties]
   application:

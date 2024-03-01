@@ -32,7 +32,7 @@ public class ScrapperWebClient {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
-    public Optional<String> registerChat(Integer id) {
+    public Optional<String> registerChat(Long id) {
         return webClient.post()
             .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
             .retrieve()
@@ -43,7 +43,7 @@ public class ScrapperWebClient {
             .blockOptional();
     }
 
-    public Optional<String> deleteChat(Integer id) {
+    public Optional<String> deleteChat(Long id) {
         return webClient.delete()
             .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
             .retrieve()
@@ -54,7 +54,7 @@ public class ScrapperWebClient {
             .blockOptional();
     }
 
-    public Optional<ListLinksResponse> getLinks(Integer id) {
+    public Optional<ListLinksResponse> getLinks(Long id) {
         return webClient.get()
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
@@ -66,7 +66,7 @@ public class ScrapperWebClient {
             .blockOptional();
     }
 
-    public Optional<LinkResponse> addLink(Integer id, AddLinkRequest request) {
+    public Optional<LinkResponse> addLink(Long id, AddLinkRequest request) {
         return webClient.post()
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
@@ -79,7 +79,7 @@ public class ScrapperWebClient {
             .blockOptional();
     }
 
-    public Optional<LinkResponse> removeLink(Integer id, RemoveLinkRequest request) {
+    public Optional<LinkResponse> removeLink(Long id, RemoveLinkRequest request) {
         return webClient.method(HttpMethod.DELETE)
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))

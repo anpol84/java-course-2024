@@ -19,6 +19,9 @@ public class ClientConfiguration {
     @Value(value = "${api.stackoverflow.baseurl}")
     public String stackoverflowBaseurl;
 
+    @Value(value = "${api.github.token}")
+    public String githubToken;
+
     @Bean
     public StackOverflowWebClient stackOverflowWebClient() {
         return new StackOverflowWebClient(stackoverflowBaseurl);
@@ -26,7 +29,7 @@ public class ClientConfiguration {
 
     @Bean
     public GithubWebClient githubClient() {
-        return new GithubWebClient(githubBaseurl);
+        return new GithubWebClient(githubBaseurl, githubToken);
     }
 
     @Bean

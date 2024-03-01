@@ -1,42 +1,53 @@
 package edu.java.bot.command;
 
-
-import edu.java.bot.dao.LinkDao;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class CommandHolder {
-    private static final List<Command> COMMANDS;
-    private static final Map<String, Command> COMMAND_MAP;
+    private final List<Command> commands;
+    private final Map<String, Command> commandMap;
+    private HelpCommand helpCommand;
 
-    static {
-        COMMANDS = new ArrayList<>();
-        LinkDao linkDao = new LinkDao();
-        COMMANDS.add(new HelpCommand());
-        COMMANDS.add(new StartCommand());
-        COMMANDS.add(new ListCommand(linkDao));
-        COMMANDS.add(new TrackCommand(linkDao));
-        COMMANDS.add(new UntrackCommand(linkDao));
+    /*
+    Тут использую инъекцию через сеттер, т.к. образуется циклическая зависимость (как по другому ее избежать
+    не придумал, но вроде бы она не сильно критичная, да и была с самого начала, просто до этого я не создавал
+    бины
+    */
+    @Autowired
+    public void setHelpCommand(HelpCommand helpCommand) {
+        this.helpCommand = helpCommand;
+        commands.add(helpCommand);
+        commandMap.put(helpCommand.command(), helpCommand);
+    }
 
-        COMMAND_MAP = new HashMap<>();
-        for (Command command : COMMANDS) {
-            COMMAND_MAP.put(command.command(), command);
+    public CommandHolder(
+        StartCommand startCommand,
+        ListCommand listCommand,
+        TrackCommand trackCommand,
+        UntrackCommand untrackCommand
+    ) {
+        commands = new ArrayList<>();
+        commands.add(startCommand);
+        commands.add(listCommand);
+        commands.add(trackCommand);
+        commands.add(untrackCommand);
+        commandMap = new HashMap<>();
+        for (Command command : commands) {
+            commandMap.put(command.command(), command);
         }
     }
 
-    private CommandHolder() {
-
+    public List<Command> getCommands() {
+        return commands;
     }
 
-    public static List<Command> getCommands() {
-        return COMMANDS;
+    public Command getCommandByName(String commandName) {
+        return commandMap.get(commandName);
     }
-
-
-    public static Command getCommandByName(String commandName) {
-        return COMMAND_MAP.get(commandName);
-    }
-
 }

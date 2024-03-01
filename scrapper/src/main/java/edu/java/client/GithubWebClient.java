@@ -15,12 +15,19 @@ public class GithubWebClient implements GithubClient {
 
     private final static String DEFAULT_URL = "https://api.github.com/";
 
+    /*
+    Токен чтобы делать много запросов к апи
+     */
+    private String token;
+
     public GithubWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
+        this.token = "";
     }
 
-    public GithubWebClient(String baseUrl) {
+    public GithubWebClient(String baseUrl, String token) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
+        this.token = token;
     }
 
     @Override
@@ -31,6 +38,8 @@ public class GithubWebClient implements GithubClient {
                 .path(completedQuestionUrl)
                 .queryParam("per_page", 1)
                 .build())
+                        .header("Authorization",
+                                "Bearer " + token)
             .retrieve()
             .bodyToMono(String.class)
             .mapNotNull(this::parseResponse).block());

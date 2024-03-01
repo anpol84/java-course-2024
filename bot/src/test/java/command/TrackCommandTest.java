@@ -1,34 +1,38 @@
 package command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import edu.java.bot.client.ScrapperWebClient;
+import edu.java.bot.clientDto.AddLinkRequest;
+import edu.java.bot.clientDto.ApiErrorResponse;
+import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.command.TrackCommand;
-import edu.java.bot.dao.LinkDao;
+import edu.java.bot.exception.ApiErrorException;
 import org.junit.jupiter.api.Test;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
 
 
 public class TrackCommandTest {
 
     @Test
     public void testCommand() {
-        TrackCommand trackCommand = new TrackCommand(new LinkDao());
+        ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
+        TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
 
         assertEquals(trackCommand.command(),"/track");
     }
 
     @Test
-    public void testHandleInvalidUrl() {
-        LinkDao linkDao = spy(new LinkDao());
+    public void testHandleInvalidUrl() throws URISyntaxException {
+        ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
         Update update = mock(Update.class);
         Message message = mock(Message.class);
         when(update.message()).thenReturn(message);
@@ -36,15 +40,21 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track https://stackoverflow.com/search?q=unsupported%20link");
-        TrackCommand trackCommand = new TrackCommand(linkDao);
-        SendMessage sendMessage = trackCommand.handle(update);
-        assertEquals(sendMessage.getParameters().get("text"), "It is not valid link");
-        verify(linkDao, never()).addResource(anyLong(), anyString(), anyString());
+        when(scrapperWebClient.addLink(123456789L,
+            new AddLinkRequest(new URI("https://stackoverflow.com/search?q=unsupported%20link"))))
+            .thenThrow(new ApiErrorException(new ApiErrorResponse("bad", "400", "name",
+                "message", List.of("1", "2"))));
+        TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
+        try {
+            SendMessage sendMessage = trackCommand.handle(update);
+        }catch (ApiErrorException e){
+            assertEquals("bad", e.getErrorResponse().getDescription());
+        }
     }
 
     @Test
-    public void testHandleValidUrl() {
-        LinkDao linkDao = spy(new LinkDao());
+    public void testHandleValidUrl() throws URISyntaxException {
+        ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
         Update update = mock(Update.class);
         Message message = mock(Message.class);
         when(update.message()).thenReturn(message);
@@ -52,21 +62,18 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track http://stackoverflow.com/questions");
-
-        TrackCommand trackCommand = new TrackCommand(linkDao);
-
+        when(scrapperWebClient.addLink(123456789L,
+            new AddLinkRequest(new URI("http://stackoverflow.com/questions"))))
+            .thenReturn(Optional.of(new LinkResponse(1L, new URI("http://stackoverflow.com/questions"))));
+        TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         SendMessage sendMessage = trackCommand.handle(update);
-
         assertEquals(sendMessage.getParameters().get("text"), "The resource has been added");
-
-        verify(linkDao).addResource(123456789L,"http://stackoverflow.com", "questions");
     }
 
     @Test
     public void testDescription() {
-
-        TrackCommand trackCommand = new TrackCommand(new LinkDao());
-
+        ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
+        TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         assertEquals(trackCommand.getDescription(), "This command tracks some link");
     }
 }

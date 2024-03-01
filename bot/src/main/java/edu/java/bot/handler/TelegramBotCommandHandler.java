@@ -1,7 +1,5 @@
 package edu.java.bot.handler;
 
-
-import edu.java.bot.configuration.ApplicationConfig;
 import edu.java.bot.model.BotImpl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +10,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TelegramBotCommandHandler {
 
-    private final ApplicationConfig applicationConfig;
+    private final BotImpl bot;
 
     public void startBot() {
-        BotImpl bot = new BotImpl(applicationConfig.telegramToken());
         bot.start();
     }
 

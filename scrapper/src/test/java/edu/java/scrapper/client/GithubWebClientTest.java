@@ -34,14 +34,13 @@ public class GithubWebClientTest {
 
         String baseUrl = "http://localhost:" + wireMockServer.port();
         System.out.println(baseUrl);;
-        githubClient = new GithubWebClient(baseUrl);
+        githubClient = new GithubWebClient(baseUrl, "123");
     }
 
     @AfterEach
     void tearDown() {
         wireMockServer.stop();
     }
-
 
     @Test
     public void testFetchLatestRepositoryActivity() {
@@ -68,10 +67,6 @@ public class GithubWebClientTest {
         assertEquals(OffsetDateTime.ofInstant(Instant.ofEpochSecond(1644759591), ZoneOffset.UTC),
             response.getCreatedAt());
     }
-
-
-
-
 
     @Test
     public void testFetchLatestRepositoryActivityEmptyItems() {

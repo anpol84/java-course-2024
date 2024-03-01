@@ -2,17 +2,18 @@ package edu.java.bot.command;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
-import edu.java.bot.dao.LinkDao;
-import java.util.Map;
-import java.util.Set;
+import edu.java.bot.client.ScrapperWebClient;
+import edu.java.bot.clientDto.LinkResponse;
+import edu.java.bot.clientDto.ListLinksResponse;
+import edu.java.bot.exception.ApiErrorException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 
+@Component
+@RequiredArgsConstructor
 public class ListCommand implements Command {
-    private final LinkDao linkDao;
-
-    public ListCommand(LinkDao linkDao) {
-        this.linkDao = linkDao;
-    }
+    private final ScrapperWebClient scrapperWebClient;
 
     @Override
     public String command() {
@@ -23,23 +24,19 @@ public class ListCommand implements Command {
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
         String noLinks = "At the moment, no links are being tracked.";
-        Map<String, Set<String>> domainsAndResources = linkDao.getResources().get(chatId);
-        if (domainsAndResources == null) {
-            return new SendMessage(chatId, noLinks);
-        }
-        StringBuilder message = new StringBuilder("Here is the list of domains and resources:\n");
-        boolean isNotEmptyDomains = false;
-        for (Map.Entry<String, Set<String>> entry : domainsAndResources.entrySet()) {
-            message.append(entry.getKey()).append(":\n");
-            for (String resource : entry.getValue()) {
-                message.append(entry.getKey()).append("/").append(resource).append("\n");
-                isNotEmptyDomains = true;
+        try {
+            ListLinksResponse response = scrapperWebClient.getLinks(chatId).get();
+            if (response.getSize() == 0) {
+                return new SendMessage(chatId, noLinks);
             }
+            StringBuilder message = new StringBuilder("Here is the list of domains and resources:\n");
+            for (LinkResponse linkResponse : response.getLinks()) {
+                message.append(linkResponse.getUrl()).append(":\n");
+            }
+            return new SendMessage(chatId, message.toString());
+        } catch (ApiErrorException e) {
+            return new SendMessage(chatId, e.getErrorResponse().getDescription());
         }
-        if (!isNotEmptyDomains) {
-            return new SendMessage(chatId, noLinks);
-        }
-        return new SendMessage(chatId, message.toString());
     }
 
     @Override

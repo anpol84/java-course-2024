@@ -1,4 +1,4 @@
---liquibase formatted sql
+
 CREATE TABLE chat (
                       id INTEGER,
                       PRIMARY KEY (id)
