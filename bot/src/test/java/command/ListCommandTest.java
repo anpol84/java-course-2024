@@ -17,22 +17,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 public class ListCommandTest {
-
     @Test
     public void testHandleNoLinks() {
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn(Optional.of(new ListLinksResponse(new ArrayList<>(),
-            0)));
+
         Update update = mock(Update.class);
         Message message = mock(Message.class);
         when(update.message()).thenReturn(message);
         Chat chat = mock(Chat.class);
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
+        when(scrapperWebClient.getLinks(message)).thenReturn(new ListLinksResponse(new ArrayList<>(), 0));
         ListCommand listCommand = new ListCommand(scrapperWebClient);
 
         SendMessage sendMessage = listCommand.handle(update);
@@ -49,9 +47,9 @@ public class ListCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn(Optional.of(new ListLinksResponse(
+        when(scrapperWebClient.getLinks(message)).thenReturn(new ListLinksResponse(
             List.of(new LinkResponse(1L, new URI("url1")), new LinkResponse(2L, new URI("url2"))),
-            2)));
+            2));
         ListCommand listCommand = new ListCommand(scrapperWebClient);
 
         SendMessage sendMessage = listCommand.handle(update);

@@ -13,11 +13,9 @@ import edu.java.bot.command.StartCommand;
 import edu.java.bot.exception.ApiErrorException;
 import org.junit.jupiter.api.Test;
 import java.util.List;
-import java.util.Optional;
 
 
 public class StartCommandTest {
-
 
     @Test
     public void testCommand() {
@@ -35,14 +33,14 @@ public class StartCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.registerChat(123456789L)).thenReturn(Optional.of("Good"));
+        when(scrapperWebClient.registerChat(message)).thenReturn("Good");
         StartCommand startCommand = new StartCommand(scrapperWebClient);
 
         SendMessage sendMessage = startCommand.handle(update);
 
         assertEquals(sendMessage.getParameters().get("text"),"Bot has started");
 
-        when(scrapperWebClient.registerChat(123456789L))
+        when(scrapperWebClient.registerChat(message))
             .thenThrow(new ApiErrorException(
                 new ApiErrorResponse("bad", "400", "name", "message",
                     List.of("1", "2"))));

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.java.clientDto.StackOverflowResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
@@ -25,9 +24,9 @@ public class StackOverflowWebClient implements StackOverflowClient {
     }
 
     @Override
-    public Optional<StackOverflowResponse> fetchLatestAnswer(Long questionNumber) {
+    public StackOverflowResponse fetchLatestAnswer(Long questionNumber) {
         String completedQuestionUrl = String.format("questions/%s/answers", questionNumber);
-        return Optional.ofNullable(webClient.get()
+        return webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path(completedQuestionUrl)
                 .queryParam("pagesize", 1)
@@ -39,7 +38,7 @@ public class StackOverflowWebClient implements StackOverflowClient {
             )
             .retrieve()
             .bodyToMono(String.class)
-            .mapNotNull(this::parseResponse).block());
+            .mapNotNull(this::parseResponse).block();
     }
 
     private StackOverflowResponse parseResponse(String json) {

@@ -2,22 +2,21 @@ package client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Message;
 import edu.java.bot.client.ScrapperWebClient;
-import edu.java.bot.clientDto.AddLinkRequest;
 import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.clientDto.ListLinksResponse;
-import edu.java.bot.clientDto.RemoveLinkRequest;
 import edu.java.bot.exception.ApiErrorException;
+import edu.java.bot.exception.NotValidLinkException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -26,7 +25,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class ScrapperWebClientTest {
@@ -79,7 +79,7 @@ public class ScrapperWebClientTest {
     private final static String LINK_BODY = """
             {
                 "id":1,
-                "url":"123"
+                "url":"https://github.com/example"
             }
             """;
 
@@ -104,10 +104,12 @@ public class ScrapperWebClientTest {
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Чат зарегистрирован")));
-
-        Optional<String> response = scrapperWebClient.registerChat(1L);
-        assertTrue(response.isPresent());
-        assertEquals(response.get(), "Чат зарегистрирован");
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        String response = scrapperWebClient.registerChat(message);
+        assertEquals(response, "Чат зарегистрирован");
     }
 
     @Test
@@ -117,9 +119,12 @@ public class ScrapperWebClientTest {
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
-
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(-1L);
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.registerChat(-1L)).getErrorResponse();
+            () -> scrapperWebClient.registerChat(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -133,17 +138,19 @@ public class ScrapperWebClientTest {
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Чат зарегистрирован")));
-
-        Optional<String> response1 = scrapperWebClient.registerChat(1L);
-        assertTrue(response1.isPresent());
-        assertEquals(response1.get(), "Чат зарегистрирован");
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        String response1 = scrapperWebClient.registerChat(message);
+        assertEquals(response1, "Чат зарегистрирован");
         wireMockServer.stubFor(post(urlEqualTo("/tg-chat/1"))
             .willReturn(aResponse()
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(DOUBLE_QUERY)));
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.registerChat(1L)).getErrorResponse();
+            () -> scrapperWebClient.registerChat(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Double query", errorResponse.getExceptionName());
@@ -157,10 +164,12 @@ public class ScrapperWebClientTest {
                 .withStatus(200)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Чат успешно удалён")));
-
-        Optional<String> response = scrapperWebClient.deleteChat(1L);
-        assertTrue(response.isPresent());
-        assertEquals(response.get(), "Чат успешно удалён");
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        String response = scrapperWebClient.deleteChat(message);
+        assertEquals(response, "Чат успешно удалён");
     }
 
     @Test
@@ -170,9 +179,12 @@ public class ScrapperWebClientTest {
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
-
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(-1L);
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.deleteChat(-1L)).getErrorResponse();
+            () -> scrapperWebClient.deleteChat(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -186,8 +198,12 @@ public class ScrapperWebClientTest {
                 .withStatus(404)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(NOT_FOUND)));
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.deleteChat(1L)).getErrorResponse();
+            () -> scrapperWebClient.deleteChat(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("404", errorResponse.getCode());
         assertEquals("Resource not found", errorResponse.getExceptionName());
@@ -195,7 +211,7 @@ public class ScrapperWebClientTest {
     }
 
     @Test
-    public void getLinksCorrectBodyTest(){
+    public void getLinksCorrectBodyTest() {
         String body = """
             {
                 "links":[
@@ -214,9 +230,12 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(body)));
 
-        Optional<ListLinksResponse> response = scrapperWebClient.getLinks(1L);
-        assertTrue(response.isPresent());
-        ListLinksResponse listLinksResponse = response.get();
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+
+        ListLinksResponse listLinksResponse = scrapperWebClient.getLinks(message);
         Assertions.assertEquals(listLinksResponse.getSize(), 1);
         Assertions.assertEquals(listLinksResponse.getLinks().get(0).getId(), 1);
         Assertions.assertEquals(listLinksResponse.getLinks().get(0).getUrl().getPath(), "link1");
@@ -231,8 +250,13 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
 
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(-2L);
+
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.getLinks(-2L)).getErrorResponse();
+            () -> scrapperWebClient.getLinks(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -248,8 +272,13 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(NOT_FOUND)));
 
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(2L);
+
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.getLinks(2L)).getErrorResponse();
+            () -> scrapperWebClient.getLinks(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("404", errorResponse.getCode());
         assertEquals("Resource not found", errorResponse.getExceptionName());
@@ -265,11 +294,15 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(LINK_BODY)));
 
-        Optional<LinkResponse> response = scrapperWebClient.addLink(1L, new AddLinkRequest(new URI("123")));
-        assertTrue(response.isPresent());
-        LinkResponse linkResponse = response.get();
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
+        LinkResponse linkResponse = scrapperWebClient.addLink(message);
         Assertions.assertEquals(linkResponse.getId(), 1);
-        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
+        System.out.println(linkResponse.getUrl());
+        Assertions.assertEquals(linkResponse.getUrl().toString(), "https://github.com/example");
     }
 
     @Test
@@ -280,9 +313,13 @@ public class ScrapperWebClientTest {
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
-
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(-1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.addLink(-1L, new AddLinkRequest(new URI("123")))).getErrorResponse();
+            () -> scrapperWebClient.addLink(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -297,13 +334,16 @@ public class ScrapperWebClientTest {
                 .withStatus(400)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track 123");
+        NotValidLinkException exception = assertThrows(
+            NotValidLinkException.class,
+            () -> scrapperWebClient.addLink( message));
+        assertEquals("It is not valid link", exception.getMessage());
 
-        ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.addLink(1L, new AddLinkRequest(new URI("")))).getErrorResponse();
-        assertEquals("some description", errorResponse.getDescription());
-        assertEquals("400", errorResponse.getCode());
-        assertEquals("Bad params", errorResponse.getExceptionName());
-        assertEquals("Some mistake", errorResponse.getExceptionMessage());
     }
 
     @Test
@@ -314,9 +354,13 @@ public class ScrapperWebClientTest {
                 .withStatus(404)
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(NOT_FOUND)));
-
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.addLink(1L, new AddLinkRequest(new URI("123")))).getErrorResponse();
+            () -> scrapperWebClient.addLink(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("404", errorResponse.getCode());
         assertEquals("Resource not found", errorResponse.getExceptionName());
@@ -332,11 +376,15 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(LINK_BODY)));
 
-        Optional<LinkResponse> response = scrapperWebClient.addLink(1L, new AddLinkRequest(new URI("123")));
-        assertTrue(response.isPresent());
-        LinkResponse linkResponse =  response.get();
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
+
+        LinkResponse linkResponse = scrapperWebClient.addLink(message);
         Assertions.assertEquals(linkResponse.getId(), 1);
-        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
+        Assertions.assertEquals(linkResponse.getUrl().toString(), "https://github.com/example");
 
         wireMockServer.stubFor(post(urlEqualTo("/links"))
             .withHeader("Tg-Chat-Id", equalTo("1"))
@@ -346,7 +394,7 @@ public class ScrapperWebClientTest {
                 .withBody(BAD_PARAMS)));
 
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.addLink(1L, new AddLinkRequest(new URI("123")))).getErrorResponse();
+            () -> scrapperWebClient.addLink(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -362,11 +410,15 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(LINK_BODY)));
 
-        Optional<LinkResponse> response = scrapperWebClient.removeLink(1L, new RemoveLinkRequest(new URI("123")));
-        assertTrue(response.isPresent());
-        LinkResponse linkResponse = response.get();
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
+
+        LinkResponse linkResponse = scrapperWebClient.removeLink(message);
         Assertions.assertEquals(linkResponse.getId(), 1);
-        Assertions.assertEquals(linkResponse.getUrl().getPath(), "123");
+        Assertions.assertEquals(linkResponse.getUrl().toString(), "https://github.com/example");
     }
 
     @Test
@@ -378,8 +430,14 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
 
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(-1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
+
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.removeLink(-1L, new RemoveLinkRequest(new URI("123")))).getErrorResponse();
+            () -> scrapperWebClient.removeLink(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -395,12 +453,15 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(BAD_PARAMS)));
 
-        ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.removeLink(1L, new RemoveLinkRequest(new URI("")))).getErrorResponse();
-        assertEquals("some description", errorResponse.getDescription());
-        assertEquals("400", errorResponse.getCode());
-        assertEquals("Bad params", errorResponse.getExceptionName());
-        assertEquals("Some mistake", errorResponse.getExceptionMessage());
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track 123");
+
+        NotValidLinkException exception = assertThrows(NotValidLinkException.class,
+            () -> scrapperWebClient.removeLink(message));
+        assertEquals("It is not valid link", exception.getMessage());
     }
 
     @Test
@@ -412,8 +473,14 @@ public class ScrapperWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(NOT_FOUND)));
 
+        Message message = mock(Message.class);
+        Chat chat = mock(Chat.class);
+        when(message.chat()).thenReturn(chat);
+        when(chat.id()).thenReturn(1L);
+        when(message.text()).thenReturn("/track https://github.com/example");
+
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> scrapperWebClient.removeLink(1L, new RemoveLinkRequest(new URI("123")))).getErrorResponse();
+            () -> scrapperWebClient.removeLink(message)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("404", errorResponse.getCode());
         assertEquals("Resource not found", errorResponse.getExceptionName());

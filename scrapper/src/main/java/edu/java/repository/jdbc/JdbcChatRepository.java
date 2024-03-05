@@ -1,9 +1,9 @@
-package edu.java.repository;
+package edu.java.repository.jdbc;
 
 import edu.java.model.Chat;
-import edu.java.model.Link;
-import java.time.OffsetDateTime;
+import edu.java.repository.ChatRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,33 +12,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcChatRepository {
+public class JdbcChatRepository implements ChatRepository {
     private final JdbcTemplate jdbcTemplate;
-    private final JdbcLinkRepository linkRepository;
 
+    @Override
     @Transactional
     public void add(Long id) {
         jdbcTemplate.update("INSERT INTO chat VALUES (?)", id);
     }
 
+    @Override
     @Transactional
-    public void remove(Long id) {
-        List<Link> links = jdbcTemplate.query("SELECT DISTINCT * FROM chat_link c JOIN link l"
-                + " ON c.link_id = l.id WHERE c.chat_id = ?",
-            (rs, rowNum) -> new Link(rs.getLong("link_id"), rs.getString("url"),
-                rs.getObject("last_update", OffsetDateTime.class)), id);
-        for (Link link : links) {
-            linkRepository.remove(id, link.getUrl());
-        }
-        jdbcTemplate.update("DELETE FROM chat WHERE id = ?", id);
+    public int remove(Long id) {
+        int deletedRows = jdbcTemplate.update("DELETE FROM chat WHERE id = ?", id);
+        jdbcTemplate.update("DELETE FROM link WHERE id NOT IN (SELECT link_id FROM chat_link)");
+        return deletedRows;
     }
 
-    public Chat findById(Long id) {
+    @Override
+    public Optional<Chat> findById(Long id) {
         List<Chat> chats = jdbcTemplate.query("SELECT * FROM chat WHERE id = ?",
             (rs, rowNum) -> new Chat(rs.getLong("id")), id);
-        return chats.isEmpty() ? null : chats.get(0);
+        return Optional.ofNullable(chats.get(0));
     }
 
+    @Override
     public List<Chat> findAll() {
         return jdbcTemplate.query("SELECT * FROM chat", (rs, rowNum) -> new Chat(rs.getLong("id")));
     }

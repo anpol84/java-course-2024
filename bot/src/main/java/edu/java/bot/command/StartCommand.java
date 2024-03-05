@@ -21,7 +21,7 @@ public class StartCommand implements Command {
     @Override
     public SendMessage handle(Update update) {
         try {
-            scrapperWebClient.registerChat(update.message().chat().id());
+            scrapperWebClient.registerChat(update.message());
             return new SendMessage(update.message().chat().id(), "Bot has started");
         } catch (ApiErrorException e) {
             return new SendMessage(update.message().chat().id(), e.getErrorResponse().getDescription());

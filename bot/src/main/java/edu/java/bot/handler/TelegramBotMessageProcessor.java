@@ -4,7 +4,6 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.command.Command;
 import edu.java.bot.command.CommandHolder;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TelegramBotMessageProcessor implements MessageProcessor {
     private final CommandHolder commandHolder;
-
-    @Override
-    public List<? extends Command> commands() {
-        return commandHolder.getCommands();
-    }
 
     @Override
     public SendMessage process(Update update) {

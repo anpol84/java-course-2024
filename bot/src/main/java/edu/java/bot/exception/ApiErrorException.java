@@ -2,6 +2,7 @@ package edu.java.bot.exception;
 
 import edu.java.bot.clientDto.ApiErrorResponse;
 
+
 public class ApiErrorException extends RuntimeException {
     private final ApiErrorResponse errorResponse;
 

@@ -8,7 +8,6 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.client.ScrapperWebClient;
-import edu.java.bot.clientDto.AddLinkRequest;
 import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.command.TrackCommand;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 
 
 public class TrackCommandTest {
@@ -40,8 +38,7 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track https://stackoverflow.com/search?q=unsupported%20link");
-        when(scrapperWebClient.addLink(123456789L,
-            new AddLinkRequest(new URI("https://stackoverflow.com/search?q=unsupported%20link"))))
+        when(scrapperWebClient.addLink(message))
             .thenThrow(new ApiErrorException(new ApiErrorResponse("bad", "400", "name",
                 "message", List.of("1", "2"))));
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
@@ -62,9 +59,8 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track http://stackoverflow.com/questions");
-        when(scrapperWebClient.addLink(123456789L,
-            new AddLinkRequest(new URI("http://stackoverflow.com/questions"))))
-            .thenReturn(Optional.of(new LinkResponse(1L, new URI("http://stackoverflow.com/questions"))));
+        when(scrapperWebClient.addLink(message))
+            .thenReturn(new LinkResponse(1L, new URI("http://stackoverflow.com/questions")));
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         SendMessage sendMessage = trackCommand.handle(update);
         assertEquals(sendMessage.getParameters().get("text"), "The resource has been added");

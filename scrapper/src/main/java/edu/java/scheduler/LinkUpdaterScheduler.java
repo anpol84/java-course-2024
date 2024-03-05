@@ -1,6 +1,6 @@
 package edu.java.scheduler;
 
-import edu.java.service.JdbcLinkUpdater;
+import edu.java.service.updater.UpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LinkUpdaterScheduler {
 
-    private final JdbcLinkUpdater linkUpdater;
+    private final UpdateService linkUpdater;
 
     @Scheduled(fixedDelayString = "${app.scheduler.interval}")
     public void update() {

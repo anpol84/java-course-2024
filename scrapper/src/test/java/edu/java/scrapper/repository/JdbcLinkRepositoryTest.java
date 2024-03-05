@@ -1,8 +1,8 @@
 package edu.java.scrapper.repository;
 
 import edu.java.model.Link;
-import edu.java.repository.JdbcChatRepository;
-import edu.java.repository.JdbcLinkRepository;
+import edu.java.repository.jdbc.JdbcChatRepository;
+import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class JdbcLinkRepositoryTest extends IntegrationTest {
     private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate, linkRepository);
+    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
 
     @Test
     void addTest() {
@@ -93,7 +93,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(1L, "http://test.ru");
         linkRepository.add(2L, "http://test2.ru");
         linkRepository.add(1L, "http://test3.ru");
-        List<Link> links = linkRepository.findByLastActivity(2);
+        List<Link> links = linkRepository.findByOldestUpdates(2);
         assertEquals(2, links.size());
         assertEquals("http://test.ru", links.get(0).getUrl());
         assertEquals("http://test2.ru", links.get(1).getUrl());
@@ -102,12 +102,22 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
     }
 
     @Test
-    void updateTimeTest(){
+    void setUpdateAtTest(){
         chatRepository.add(1L);
         linkRepository.add(1L, "http://test.ru");
-        linkRepository.updateTime("http://test.ru", OffsetDateTime.MAX);
+        linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.MAX);
         Link link = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
-        assertEquals(OffsetDateTime.MAX, link.getLastActivity());
+        assertEquals(OffsetDateTime.MAX, link.getUpdateAt());
+        chatRepository.remove(1L);
+    }
+
+    @Test
+    void setLastApiUpdateTest(){
+        chatRepository.add(1L);
+        linkRepository.add(1L, "http://test.ru");
+        linkRepository.setLastApiUpdate("http://test.ru", OffsetDateTime.MAX);
+        Link link = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
+        assertEquals(OffsetDateTime.MAX, link.getLastApiUpdate());
         chatRepository.remove(1L);
     }
 

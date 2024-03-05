@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ListCommand implements Command {
     private final ScrapperWebClient scrapperWebClient;
+    private final static String NO_LINK_MESSAGE = "At the moment, no links are being tracked.";
 
     @Override
     public String command() {
@@ -23,11 +24,10 @@ public class ListCommand implements Command {
     @Override
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
-        String noLinks = "At the moment, no links are being tracked.";
         try {
-            ListLinksResponse response = scrapperWebClient.getLinks(chatId).get();
+            ListLinksResponse response = scrapperWebClient.getLinks(update.message());
             if (response.getSize() == 0) {
-                return new SendMessage(chatId, noLinks);
+                return new SendMessage(chatId, NO_LINK_MESSAGE);
             }
             StringBuilder message = new StringBuilder("Here is the list of domains and resources:\n");
             for (LinkResponse linkResponse : response.getLinks()) {

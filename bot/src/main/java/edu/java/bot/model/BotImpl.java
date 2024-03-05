@@ -12,6 +12,7 @@ import edu.java.bot.command.Command;
 import edu.java.bot.command.CommandHolder;
 import edu.java.bot.configuration.ApplicationConfig;
 import edu.java.bot.handler.MessageProcessor;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -22,14 +23,12 @@ public class BotImpl implements Bot {
     private final TelegramBot bot;
     private final MessageProcessor messageProcessor;
     private final CommandHolder commandHolder;
-    private final ApplicationConfig applicationConfig;
 
     public BotImpl(MessageProcessor messageProcessor, CommandHolder commandHolder,
         ApplicationConfig applicationConfig) {
-        this.applicationConfig = applicationConfig;
         this.messageProcessor = messageProcessor;
         this.commandHolder = commandHolder;
-        this.bot = new TelegramBot(this.applicationConfig.telegramToken());
+        this.bot = new TelegramBot(applicationConfig.telegramToken());
     }
 
     @Override
@@ -73,5 +72,10 @@ public class BotImpl implements Bot {
     public void sendMessageToChat(String chatId, String message) {
         SendMessage sendMessage = new SendMessage(chatId, message);
         bot.execute(sendMessage);
+    }
+
+    @PostConstruct
+    public void init() {
+        start();
     }
 }

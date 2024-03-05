@@ -16,9 +16,30 @@ import edu.java.bot.command.StartCommand;
 import edu.java.bot.command.TrackCommand;
 import edu.java.bot.command.UntrackCommand;
 import org.junit.jupiter.api.Test;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class HelpCommandTest {
+    private final Map<String, Command> commandMap;
+    {
+        CommandHolder commandHolder = new CommandHolder();
+
+        commandMap = new HashMap<>();
+
+        HelpCommand helpCommand = new HelpCommand(commandHolder);
+        ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
+        StartCommand startCommand = new StartCommand(scrapperWebClient);
+        ListCommand listCommand = new ListCommand(scrapperWebClient);
+        TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
+        UntrackCommand untrackCommand = new UntrackCommand(scrapperWebClient);
+        commandMap.put(helpCommand.command(), helpCommand);
+        commandMap.put(startCommand.command(), startCommand);
+        commandMap.put(listCommand.command(), listCommand);
+        commandMap.put(trackCommand.command(), trackCommand);
+        commandMap.put(untrackCommand.command(), untrackCommand);
+        commandHolder.setCommandMap(commandMap);
+    }
 
     @Test
     public void testHandle() {
@@ -30,34 +51,24 @@ public class HelpCommandTest {
         Update update = mock(Update.class);
         when(update.message()).thenReturn(message);
 
-        HelpCommand helpCommand = new HelpCommand();
-        CommandHolder commandHolder = new CommandHolder
-            (new StartCommand(new ScrapperWebClient()),
-                new ListCommand(new ScrapperWebClient()), new TrackCommand(new ScrapperWebClient()),
-                new UntrackCommand(new ScrapperWebClient()));
-        commandHolder.setHelpCommand(helpCommand);
-        helpCommand.setCommandHolder(commandHolder);
-
-        SendMessage sendMessage = helpCommand.handle(update);
+        SendMessage sendMessage = commandMap.get("/help").handle(update);
 
         assertEquals(sendMessage.getParameters().get("text"),
             "Available commands:\n" +
-                "/start - This command registers new user\n" +
                 "/list - This command returns list of tracks\n" +
+                "/help - This command returns list of commands\n" +
                 "/track - This command tracks some link\n" +
-                "/untrack - This command untracks some link\n" +
-                "/help - This command returns list of commands\n");
+                "/start - This command registers new user\n" +
+                "/untrack - This command untracks some link\n");
     }
 
     @Test
     public void testCommand() {
-        Command command = new HelpCommand();
-        assertEquals("/help", command.command());
+        assertEquals("/help", commandMap.get("/help").command());
     }
 
     @Test
     public void testDescription() {
-        Command command = new HelpCommand();
-        assertEquals("This command returns list of commands", command.getDescription());
+        assertEquals("This command returns list of commands", commandMap.get("/help").getDescription());
     }
 }

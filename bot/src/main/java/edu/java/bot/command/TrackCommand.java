@@ -3,10 +3,8 @@ package edu.java.bot.command;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.client.ScrapperWebClient;
-import edu.java.bot.clientDto.AddLinkRequest;
 import edu.java.bot.exception.ApiErrorException;
-import edu.java.bot.utils.UrlUtils;
-import java.net.URI;
+import edu.java.bot.exception.NotValidLinkException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +21,12 @@ public class TrackCommand implements Command {
 
     @Override
     public SendMessage handle(Update update) {
-        String message = update.message().text().split(" ")[1];
-        if (!UrlUtils.isValidUrl(message)) {
-            return new SendMessage(update.message().chat().id(), "It is not valid link");
-        }
         try {
-            scrapperWebClient.addLink(update.message().chat().id(), new AddLinkRequest(new URI(message)));
+            scrapperWebClient.addLink(update.message());
         } catch (ApiErrorException e) {
             return new SendMessage(update.message().chat().id(), e.getErrorResponse().getDescription());
+        } catch (NotValidLinkException e) {
+            return new SendMessage(update.message().chat().id(), e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

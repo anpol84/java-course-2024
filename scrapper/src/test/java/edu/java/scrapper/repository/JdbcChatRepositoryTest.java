@@ -2,18 +2,20 @@ package edu.java.scrapper.repository;
 
 import edu.java.model.Chat;
 import edu.java.model.Link;
-import edu.java.repository.JdbcChatRepository;
-import edu.java.repository.JdbcLinkRepository;
+import edu.java.repository.jdbc.JdbcChatRepository;
+import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
+import java.util.Optional;
 
 
 public class JdbcChatRepositoryTest extends IntegrationTest {
 
     private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate, linkRepository);
+    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
 
     @Test
     void addTest() {
@@ -60,7 +62,9 @@ public class JdbcChatRepositoryTest extends IntegrationTest {
     void findByIdTest() {
         chatRepository.add(7L);
         chatRepository.add(8L);
-        Chat chat = chatRepository.findById(7L);
+        Optional<Chat> chatOptional = chatRepository.findById(7L);
+        assertTrue(chatOptional.isPresent());
+        Chat chat = chatOptional.get();
         assertEquals(7, chat.getId());
         chatRepository.remove(7L);
         chatRepository.remove(8L);

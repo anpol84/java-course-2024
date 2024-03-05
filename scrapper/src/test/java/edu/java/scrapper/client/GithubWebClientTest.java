@@ -13,11 +13,10 @@ import org.springframework.http.MediaType;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class GithubWebClientTest {
@@ -56,9 +55,7 @@ public class GithubWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        Optional<GithubResponse> response1 = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
-        System.out.println(response1);
-        GithubResponse response = response1.get();
+        GithubResponse response = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
         assertNotNull(response);
         assertEquals(123L, response.getId());
         assertEquals("PushEvent", response.getType());
@@ -80,9 +77,9 @@ public class GithubWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        Optional<GithubResponse> response = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
+        GithubResponse response = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
 
-        assertFalse(response.isPresent());
+        assertNull(response);
     }
 
     @Test
@@ -98,7 +95,7 @@ public class GithubWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        Optional<GithubResponse> response = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
-        assertFalse(response.isPresent());
+        GithubResponse response = githubClient.fetchLatestRepositoryActivity(repositoryName, authorName);
+        assertNull(response);
     }
 }

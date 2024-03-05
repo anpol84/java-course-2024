@@ -10,14 +10,12 @@ import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.client.ScrapperWebClient;
 import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
-import edu.java.bot.clientDto.RemoveLinkRequest;
 import edu.java.bot.command.UntrackCommand;
 import edu.java.bot.exception.ApiErrorException;
 import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 
 
 public class UntrackCommandTest {
@@ -40,8 +38,7 @@ public class UntrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
-        when(scrapperWebClient.removeLink(123456789L,
-            new RemoveLinkRequest(new URI("http://stackoverflow.com/questions"))))
+        when(scrapperWebClient.removeLink(message))
             .thenThrow(new ApiErrorException(new ApiErrorResponse("bad", "400", "name",
                 "message", List.of("1", "2"))));
 
@@ -64,22 +61,19 @@ public class UntrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
-        when(scrapperWebClient.removeLink(123456789L,
-            new RemoveLinkRequest(new URI("http://stackoverflow.com/questions"))))
-            .thenReturn(Optional.of(new LinkResponse(1L, new URI("http://stackoverflow.com/questions"))));
+        when(scrapperWebClient.removeLink(message))
+            .thenReturn(new LinkResponse(1L, new URI("http://stackoverflow.com/questions")));
         UntrackCommand untrackCommand = new UntrackCommand(scrapperWebClient);
 
         SendMessage sendMessage = untrackCommand.handle(update);
 
         assertEquals(sendMessage.getParameters().get("text"), "The resource has been deleted");
-
     }
 
     @Test
     public void testDescription() {
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
         UntrackCommand untrackCommand = new UntrackCommand(scrapperWebClient);
-
         assertEquals(untrackCommand.getDescription(), "This command untracks some link");
     }
 }

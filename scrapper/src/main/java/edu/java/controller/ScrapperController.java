@@ -1,8 +1,8 @@
 package edu.java.controller;
 
 import edu.java.model.Link;
-import edu.java.service.JdbcChatService;
-import edu.java.service.JdbcLinkService;
+import edu.java.service.ChatService;
+import edu.java.service.LinkService;
 import edu.java.serviceDto.AddLinkRequest;
 import edu.java.serviceDto.LinkResponse;
 import edu.java.serviceDto.ListLinksResponse;
@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class ScrapperController {
-    private final JdbcChatService jdbcChatService;
-    private final JdbcLinkService jdbcLinkService;
+    private final ChatService jdbcChatService;
+    private final LinkService jdbcLinkService;
 
     @PostMapping("/tg-chat/{id}")
     public String registerChat(@PathVariable("id") @Min(1) Long id) {
