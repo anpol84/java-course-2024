@@ -25,4 +25,14 @@ public class LinkUpdaterScheduler {
             throw new RuntimeException(e);
         }
     }
+
+    @Scheduled(fixedDelayString = "${app.scheduler.unusedLinksInterval}")
+    public void deleteUnusedLinks() {
+        log.info("Deleting unused links...");
+        try {
+            linkUpdater.deleteUnusedLinks();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

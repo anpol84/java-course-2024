@@ -7,7 +7,6 @@ import edu.java.clientDto.LinkUpdateRequest;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,7 @@ public class GithubLinkUpdater implements LinkUpdater {
         String[] args = processLink(link.getUrl());
         GithubResponse githubResponse =
             githubWebClient.fetchLatestRepositoryActivity(args[0], args[1]);
-        if (link.getLastApiUpdate().equals(OffsetDateTime.MIN)) {
-            linkRepository.setLastApiUpdate(link.getUrl(), githubResponse.getCreatedAt());
-        } else if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
+        if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl());
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest(link.getId(), new URI(link.getUrl()),
@@ -56,6 +53,14 @@ public class GithubLinkUpdater implements LinkUpdater {
     @Override
     public String getDomain() {
         return "github.com";
+    }
+
+    @Override
+    public void setLastUpdate(Link link) {
+        String[] args = processLink(link.getUrl());
+        GithubResponse githubResponse =
+            githubWebClient.fetchLatestRepositoryActivity(args[0], args[1]);
+        linkRepository.setLastApiUpdate(link.getUrl(), githubResponse.getCreatedAt());
     }
 
     private String getDescription(GithubResponse githubResponse) {

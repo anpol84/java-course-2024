@@ -1,6 +1,5 @@
 package edu.java.bot.client;
 
-import com.pengrad.telegrambot.model.Message;
 import edu.java.bot.clientDto.AddLinkRequest;
 import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
@@ -36,9 +35,9 @@ public class ScrapperWebClient {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
-    public String registerChat(Message message) {
+    public String registerChat(Long id) {
         return webClient.post()
-            .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(message.chat().id()))
+            .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
                 .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
@@ -47,9 +46,9 @@ public class ScrapperWebClient {
             .block();
     }
 
-    public String deleteChat(Message message) {
+    public String deleteChat(Long id) {
         return webClient.delete()
-            .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(message.chat().id()))
+            .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
                 .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
@@ -58,10 +57,10 @@ public class ScrapperWebClient {
             .block();
     }
 
-    public ListLinksResponse getLinks(Message message) {
+    public ListLinksResponse getLinks(Long id) {
         return webClient.get()
             .uri(PATH_TO_LINK)
-            .header(HEADER_NAME, String.valueOf(message.chat().id()))
+            .header(HEADER_NAME, String.valueOf(id))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
                 .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
@@ -70,13 +69,12 @@ public class ScrapperWebClient {
             .block();
     }
 
-    public LinkResponse addLink(Message message) throws URISyntaxException {
-        String messageText = message.text().split(" ")[1];
-        checkLink(messageText);
-        AddLinkRequest request = new AddLinkRequest(new URI(messageText));
+    public LinkResponse addLink(String text, Long id) throws URISyntaxException {
+        checkLink(text);
+        AddLinkRequest request = new AddLinkRequest(new URI(text));
         return webClient.post()
             .uri(PATH_TO_LINK)
-            .header(HEADER_NAME, String.valueOf(message.chat().id()))
+            .header(HEADER_NAME, String.valueOf(id))
             .body(BodyInserters.fromValue(request))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)
@@ -86,13 +84,12 @@ public class ScrapperWebClient {
             .block();
     }
 
-    public LinkResponse removeLink(Message message) throws URISyntaxException {
-        String messageText = message.text().split(" ")[1];
-        checkLink(messageText);
-        RemoveLinkRequest request = new RemoveLinkRequest(new URI(messageText));
+    public LinkResponse removeLink(String text, Long id) throws URISyntaxException {
+        checkLink(text);
+        RemoveLinkRequest request = new RemoveLinkRequest(new URI(text));
         return webClient.method(HttpMethod.DELETE)
             .uri(PATH_TO_LINK)
-            .header(HEADER_NAME, String.valueOf(message.chat().id()))
+            .header(HEADER_NAME, String.valueOf(id))
             .body(BodyInserters.fromValue(request))
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(ApiErrorResponse.class)

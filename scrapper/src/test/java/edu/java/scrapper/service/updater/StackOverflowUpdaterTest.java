@@ -43,23 +43,6 @@ public class StackOverflowUpdaterTest {
     }
 
     @Test
-    public void processFirstTimeTest(){
-        Link link = new Link(1L, "https://stackoverflow.com/questions/123", OffsetDateTime.MIN,
-            OffsetDateTime.MIN);
-        StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        BotWebClient botWebClient = mock(BotWebClient.class);
-        when(stackOverflowWebClient.fetchLatestAnswer(123L))
-            .thenReturn(new StackOverflowResponse(1L, 1L, null,
-                null,OffsetDateTime.MAX));
-        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
-        StackOverflowLinkUpdater stackOverflowLinkUpdater =
-            new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
-        int count = stackOverflowLinkUpdater.process(link);
-        assertEquals(0, count);
-    }
-
-    @Test
     public void noProcessTest(){
         Link link = new Link(1L, "https://stackoverflow.com/questions/123", OffsetDateTime.MAX,
             OffsetDateTime.MAX);

@@ -42,22 +42,6 @@ public class GithubLinkUpdaterTest {
     }
 
     @Test
-    public void processFirstTimeTest(){
-        Link link = new Link(1L, "https://github.com/some/some", OffsetDateTime.MAX,
-            OffsetDateTime.MIN);
-        GithubWebClient githubWebClient = mock(GithubWebClient.class);
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        BotWebClient botWebClient = mock(BotWebClient.class);
-        when(githubWebClient.fetchLatestRepositoryActivity("some",
-            "some")).thenReturn(new GithubResponse(1L, "1", null,
-            null,OffsetDateTime.MAX));
-        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,botWebClient);
-        int count = githubLinkUpdater.process(link);
-        assertEquals(0, count);
-    }
-
-
-    @Test
     public void noProcessTest(){
         Link link = new Link(1L, "https://github.com/some/some", OffsetDateTime.MAX, OffsetDateTime.MAX);
         GithubWebClient githubWebClient = mock(GithubWebClient.class);

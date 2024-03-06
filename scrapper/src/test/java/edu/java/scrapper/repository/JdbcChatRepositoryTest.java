@@ -6,7 +6,9 @@ import edu.java.repository.jdbc.JdbcChatRepository;
 import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DuplicateKeyException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,9 @@ public class JdbcChatRepositoryTest extends IntegrationTest {
         List<Chat> chats = chatRepository.findAll();
         assertEquals(1, chats.size());
         assertEquals(1, chats.get(0).getId());
+        assertThrows(DuplicateKeyException.class, () -> {
+            chatRepository.add(1L);
+        });
         chatRepository.remove(1L);
     }
 
@@ -40,9 +45,13 @@ public class JdbcChatRepositoryTest extends IntegrationTest {
         linkRepository.add(4L, "http://example2.ru");
         chatRepository.remove(3L);
         List<Link> links = linkRepository.findAll();
-        assertEquals(1, links.size());
-        assertEquals("http://example2.ru", links.get(0).getUrl());
+        List<Chat> chatList = chatRepository.findAll();
+        assertEquals(2, links.size());
+        assertEquals(1, chatList.size());
 
+        linkRepository.remove(3L,"http://example.ru");
+        linkRepository.remove(3L,"http://example2.ru");
+        linkRepository.remove(4L,"http://example2.ru");
         chatRepository.remove(4L);
     }
 

@@ -7,7 +7,6 @@ import edu.java.clientDto.StackOverflowResponse;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import java.net.URI;
-import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,9 +25,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         long number = Long.parseLong(args[args.length - 1]);
         StackOverflowResponse stackOverflowResponse =
             stackOverflowWebClient.fetchLatestAnswer(number);
-        if (link.getLastApiUpdate().equals(OffsetDateTime.MIN)) {
-            linkRepository.setLastApiUpdate(link.getUrl(), stackOverflowResponse.getLastActivityDate());
-        } else if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
+        if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl());
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest(link.getId(), new URI(link.getUrl()),
@@ -55,6 +52,15 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
     @Override
     public String getDomain() {
         return "stackoverflow.com";
+    }
+
+    @Override
+    public void setLastUpdate(Link link) {
+        String[] args = processLink(link.getUrl());
+        long number = Long.parseLong(args[args.length - 1]);
+        StackOverflowResponse stackOverflowResponse =
+            stackOverflowWebClient.fetchLatestAnswer(number);
+        linkRepository.setLastApiUpdate(link.getUrl(), stackOverflowResponse.getLastActivityDate());
     }
 
     private String getDescription(StackOverflowResponse stackOverflowResponse) {

@@ -38,7 +38,7 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track https://stackoverflow.com/search?q=unsupported%20link");
-        when(scrapperWebClient.addLink(message))
+        when(scrapperWebClient.addLink("https://stackoverflow.com/search?q=unsupported%20link", 123456789L))
             .thenThrow(new ApiErrorException(new ApiErrorResponse("bad", "400", "name",
                 "message", List.of("1", "2"))));
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
@@ -59,7 +59,7 @@ public class TrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/track http://stackoverflow.com/questions");
-        when(scrapperWebClient.addLink(message))
+        when(scrapperWebClient.addLink("http://stackoverflow.com/questions", 123456789L))
             .thenReturn(new LinkResponse(1L, new URI("http://stackoverflow.com/questions")));
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         SendMessage sendMessage = trackCommand.handle(update);
@@ -72,4 +72,6 @@ public class TrackCommandTest {
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         assertEquals(trackCommand.getDescription(), "This command tracks some link");
     }
+
+
 }

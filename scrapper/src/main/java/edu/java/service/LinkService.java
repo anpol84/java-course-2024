@@ -6,8 +6,10 @@ import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.service.updater.LinkHolder;
 import edu.java.service.updater.LinkUpdater;
+import edu.java.serviceDto.LinkResponse;
 import edu.java.utils.LinkUtils;
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,16 +29,18 @@ public class LinkService {
     private final static String DUPLICATE_MESSAGE =
         "ERROR: duplicate key value violates unique constraint \"chat_link_pkey\"";
 
-    public Link add(long tgChatId, URI url) {
+    public LinkResponse add(long tgChatId, URI url) {
         if (!url.toString().matches(STACKOVERFLOW_REGEX) && !url.toString().matches(GITHUB_REGEX)) {
             throw new BadRequestException("Плохая ссылка", "Данная ссылка не поддерживается");
         }
         try {
-            String domain = LinkUtils.extractDomainFromUrl(url.toString());
-            LinkUpdater updater = linkHolder.getUpdaterByDomain(domain);
             Link link = linkRepository.add(tgChatId, url.toString());
-            updater.process(link);
-            return link;
+            if (link.getLastApiUpdate().equals(OffsetDateTime.MIN)) {
+                String domain = LinkUtils.extractDomainFromUrl(url.toString());
+                LinkUpdater updater = linkHolder.getUpdaterByDomain(domain);
+                updater.setLastUpdate(link);
+            }
+            return mapToLinkResponse(link);
         } catch (DataIntegrityViolationException ex) {
             if (ex.getMessage().contains(NO_CHAT_MESSAGE)) {
                 throw new NotFoundException(CHAT_NOT_EXIST,
@@ -49,15 +53,24 @@ public class LinkService {
         }
     }
 
-    public Link remove(long tgChatId, URI url) {
-        try {
-            return linkRepository.remove(tgChatId, url.toString());
-        } catch (RuntimeException e) {
+    public LinkResponse remove(long tgChatId, URI url) {
+
+        int count = linkRepository.remove(tgChatId, url.toString());
+        if (count == 0) {
             throw new NotFoundException("Ресурса не существует", "Чат или ссылка были не найдены");
         }
+        return mapToLinkResponse(new Link(tgChatId, url.toString(), OffsetDateTime.MIN, OffsetDateTime.MAX));
     }
 
-    public List<Link> listAll(long tgChatId) {
-        return linkRepository.findAllByChatId(tgChatId);
+    public List<LinkResponse> listAll(long tgChatId) {
+        return linkRepository.findAllByChatId(tgChatId).stream().map(this::mapToLinkResponse).toList();
+    }
+
+    private LinkResponse mapToLinkResponse(Link link) {
+        try {
+            return new LinkResponse(link.getId(), new URI(link.getUrl()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

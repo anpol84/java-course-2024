@@ -24,16 +24,14 @@ public class JdbcChatRepository implements ChatRepository {
     @Override
     @Transactional
     public int remove(Long id) {
-        int deletedRows = jdbcTemplate.update("DELETE FROM chat WHERE id = ?", id);
-        jdbcTemplate.update("DELETE FROM link WHERE id NOT IN (SELECT link_id FROM chat_link)");
-        return deletedRows;
+        return jdbcTemplate.update("DELETE FROM chat WHERE id = ?", id);
     }
 
     @Override
     public Optional<Chat> findById(Long id) {
-        List<Chat> chats = jdbcTemplate.query("SELECT * FROM chat WHERE id = ?",
+        var chat = jdbcTemplate.queryForObject("SELECT * FROM chat WHERE id = ?",
             (rs, rowNum) -> new Chat(rs.getLong("id")), id);
-        return Optional.ofNullable(chats.get(0));
+        return Optional.ofNullable(chat);
     }
 
     @Override

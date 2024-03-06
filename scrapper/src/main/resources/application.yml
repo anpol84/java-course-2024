@@ -2,6 +2,7 @@ app:
   scheduler:
     enable: true
     interval: 5000
+    unusedLinksInterval: 86400000
     force-check-delay: 10s
 
 spring:

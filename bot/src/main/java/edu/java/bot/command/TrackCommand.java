@@ -22,7 +22,8 @@ public class TrackCommand implements Command {
     @Override
     public SendMessage handle(Update update) {
         try {
-            scrapperWebClient.addLink(update.message());
+            String messageText = update.message().text().split(" ")[1];
+            scrapperWebClient.addLink(messageText, update.message().chat().id());
         } catch (ApiErrorException e) {
             return new SendMessage(update.message().chat().id(), e.getErrorResponse().getDescription());
         } catch (NotValidLinkException e) {

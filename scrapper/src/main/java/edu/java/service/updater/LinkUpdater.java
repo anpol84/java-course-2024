@@ -11,4 +11,6 @@ public interface LinkUpdater {
     String[] processLink(String link);
 
     String getDomain();
+
+    void setLastUpdate(Link link);
 }

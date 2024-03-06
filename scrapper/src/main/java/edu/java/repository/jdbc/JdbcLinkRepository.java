@@ -5,7 +5,6 @@ import edu.java.repository.LinkRepository;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +28,17 @@ public class JdbcLinkRepository implements LinkRepository {
     @Override
     @Transactional
     public Link add(Long chatId, String url) {
-        Integer linkId;
+        Long linkId;
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        Long id = null;
+        Link addedLink = null;
         try {
-            id = jdbcTemplate.queryForObject("SELECT id FROM link WHERE url = ?", Long.class, url);
+            addedLink = jdbcTemplate.queryForObject("SELECT * FROM link WHERE url = ?", (rs, rowNum) ->
+                new Link(rs.getLong("id"), rs.getString(URL),
+                    rs.getObject(UPDATE_AT, OffsetDateTime.class),
+                    rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)), url);
         } catch (EmptyResultDataAccessException ignored) {
         }
-        if (id == null) {
+        if (addedLink == null) {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO link"
                         + " (url, update_at, last_api_update) VALUES (?, CURRENT_TIMESTAMP, ?)",
@@ -46,25 +48,21 @@ public class JdbcLinkRepository implements LinkRepository {
                 return ps;
             }, keyHolder);
             Map<String, Object> keys = keyHolder.getKeys();
-            linkId = (Integer) keys.get("id");
+            linkId = Long.valueOf((Integer) keys.get("id"));
+            addedLink = new Link(linkId, url, OffsetDateTime.now(), OffsetDateTime.MIN);
         } else {
-            linkId = Math.toIntExact(id);
+            linkId = addedLink.getId();
         }
         jdbcTemplate.update("INSERT INTO chat_link (chat_id, link_id) VALUES (?, ?)", chatId, linkId);
-        return new Link(Long.valueOf(linkId), url, OffsetDateTime.now(ZoneOffset.UTC), OffsetDateTime.MIN);
+        return addedLink;
     }
 
     @Override
     @Transactional
-    public Link remove(Long chatId, String url) {
-        int count = jdbcTemplate.update("DELETE FROM chat_link WHERE chat_id = ? AND link_id IN"
+    public int remove(Long chatId, String url) {
+        return jdbcTemplate.update("DELETE FROM chat_link WHERE chat_id = ? AND link_id IN"
             + " (SELECT DISTINCT c.link_id FROM chat_link c JOIN link l ON c.link_id = l.id WHERE url = ?)", chatId,
             url);
-        if (count == 0) {
-            throw new RuntimeException();
-        }
-        jdbcTemplate.update("DELETE FROM link WHERE id NOT IN (SELECT link_id FROM chat_link)");
-        return new Link(chatId, url, OffsetDateTime.now(ZoneOffset.UTC), OffsetDateTime.MIN);
     }
 
     @Override
@@ -117,5 +115,10 @@ public class JdbcLinkRepository implements LinkRepository {
     public List<Long> findChatIdsByUrl(String url) {
         return jdbcTemplate.query("SELECT DISTINCT c.chat_id FROM chat_link c JOIN link l "
             + "ON c.link_id = l.id WHERE l.url = ?", (rs, rowNum) -> rs.getLong("chat_id"), url);
+    }
+
+    @Override
+    public void deleteUnusedLinks() {
+        jdbcTemplate.update("DELETE FROM link WHERE id NOT IN (SELECT link_id FROM chat_link)");
     }
 }

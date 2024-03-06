@@ -3,7 +3,6 @@ package edu.java.bot.command;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.client.ScrapperWebClient;
-import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.clientDto.ListLinksResponse;
 import edu.java.bot.exception.ApiErrorException;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +24,12 @@ public class ListCommand implements Command {
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
         try {
-            ListLinksResponse response = scrapperWebClient.getLinks(update.message());
+            ListLinksResponse response = scrapperWebClient.getLinks(chatId);
             if (response.getSize() == 0) {
                 return new SendMessage(chatId, NO_LINK_MESSAGE);
             }
             StringBuilder message = new StringBuilder("Here is the list of domains and resources:\n");
-            for (LinkResponse linkResponse : response.getLinks()) {
-                message.append(linkResponse.getUrl()).append(":\n");
-            }
+            response.getLinks().forEach(linkResponse -> message.append(linkResponse.getUrl()).append(":\n"));
             return new SendMessage(chatId, message.toString());
         } catch (ApiErrorException e) {
             return new SendMessage(chatId, e.getErrorResponse().getDescription());

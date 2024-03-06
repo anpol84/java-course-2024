@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class JdbcChatServiceTest {
+public class ChatServiceTest {
     @Test
     public void correctAddTest(){
         ChatRepository chatRepository = mock(JdbcChatRepository.class);

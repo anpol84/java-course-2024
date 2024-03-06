@@ -21,7 +21,9 @@ import edu.java.bot.command.UntrackCommand;
 import edu.java.bot.handler.MessageProcessor;
 import edu.java.bot.handler.TelegramBotMessageProcessor;
 import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -29,22 +31,20 @@ public class TelegramBotMessageProcessorTest {
 
     private final CommandHolder commandHolder;
     {
-         commandHolder = new CommandHolder();
-
-        Map<String, Command> commandMap = new HashMap<>();
-
+        commandHolder = new CommandHolder();
+        List<Command> commandList = new ArrayList<>();
         HelpCommand helpCommand = new HelpCommand(commandHolder);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
         StartCommand startCommand = new StartCommand(scrapperWebClient);
         ListCommand listCommand = new ListCommand(scrapperWebClient);
         TrackCommand trackCommand = new TrackCommand(scrapperWebClient);
         UntrackCommand untrackCommand = new UntrackCommand(scrapperWebClient);
-        commandMap.put(helpCommand.command(), helpCommand);
-        commandMap.put(startCommand.command(), startCommand);
-        commandMap.put(listCommand.command(), listCommand);
-        commandMap.put(trackCommand.command(), trackCommand);
-        commandMap.put(untrackCommand.command(), untrackCommand);
-        commandHolder.setCommandMap(commandMap);
+        commandList.add(helpCommand);
+        commandList.add(startCommand);
+        commandList.add(listCommand);
+        commandList.add(trackCommand);
+        commandList.add(untrackCommand);
+        commandHolder.setCommandMap(commandList);
     }
 
     @Test

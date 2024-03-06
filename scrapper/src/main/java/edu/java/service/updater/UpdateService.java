@@ -31,4 +31,8 @@ public class UpdateService {
         }
         return count;
     }
+
+    public void deleteUnusedLinks() {
+        linkRepository.deleteUnusedLinks();
+    }
 }

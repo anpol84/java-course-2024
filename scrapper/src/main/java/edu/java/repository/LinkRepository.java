@@ -9,7 +9,7 @@ public interface LinkRepository {
 
     Link add(Long chatId, String url);
 
-    Link remove(Long chatId, String url);
+    int remove(Long chatId, String url);
 
     List<Link> findAllByChatId(Long chatId);
 
@@ -24,4 +24,6 @@ public interface LinkRepository {
     void setLastApiUpdate(String url, OffsetDateTime time);
 
     List<Long> findChatIdsByUrl(String url);
+
+    void deleteUnusedLinks();
 }
