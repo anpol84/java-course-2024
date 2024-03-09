@@ -15,6 +15,5 @@ public class StackTraceUtil {
             stackTrace.add(el.toString());
         }
         return stackTrace;
-
     }
 }

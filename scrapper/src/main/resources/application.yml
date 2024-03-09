@@ -2,11 +2,19 @@ app:
   scheduler:
     enable: true
     interval: 5000
+    unusedLinksInterval: 86400000
     force-check-delay: 10s
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: scrapper
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scrapper
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
 server:
   port: 8080
@@ -21,7 +29,9 @@ api:
     baseurl: https://api.stackexchange.com/2.3/
   github:
     baseurl: https://api.github.com/
+    token: ${GITHUB_TOKEN}
 
 springdoc:
   swagger-ui:
     path: /swagger-ui
+

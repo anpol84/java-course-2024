@@ -10,19 +10,25 @@ import com.pengrad.telegrambot.request.SetMyCommands;
 import com.pengrad.telegrambot.response.BaseResponse;
 import edu.java.bot.command.Command;
 import edu.java.bot.command.CommandHolder;
+import edu.java.bot.configuration.ApplicationConfig;
 import edu.java.bot.handler.MessageProcessor;
-import edu.java.bot.handler.TelegramBotMessageProcessor;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 
+@Component
 public class BotImpl implements Bot {
     private final TelegramBot bot;
     private final MessageProcessor messageProcessor;
+    private final CommandHolder commandHolder;
 
-    public BotImpl(String token) {
-        this.bot = new TelegramBot(token);
-        this.messageProcessor = new TelegramBotMessageProcessor();
+    public BotImpl(MessageProcessor messageProcessor, CommandHolder commandHolder,
+        ApplicationConfig applicationConfig) {
+        this.messageProcessor = messageProcessor;
+        this.commandHolder = commandHolder;
+        this.bot = new TelegramBot(applicationConfig.telegramToken());
     }
 
     @Override
@@ -43,7 +49,7 @@ public class BotImpl implements Bot {
 
     @Override
     public void start() {
-        bot.execute(new SetMyCommands(mapToBotCommands(CommandHolder.getCommands()).toArray(new BotCommand[0])));
+        bot.execute(new SetMyCommands(mapToBotCommands(commandHolder.getCommands()).toArray(new BotCommand[0])));
         bot.setUpdatesListener(updates -> {
             process(updates);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -63,4 +69,13 @@ public class BotImpl implements Bot {
         return botCommands;
     }
 
+    public void sendMessageToChat(String chatId, String message) {
+        SendMessage sendMessage = new SendMessage(chatId, message);
+        bot.execute(sendMessage);
+    }
+
+    @PostConstruct
+    public void init() {
+        start();
+    }
 }

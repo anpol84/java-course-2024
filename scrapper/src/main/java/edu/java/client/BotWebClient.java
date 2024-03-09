@@ -3,7 +3,6 @@ package edu.java.client;
 import edu.java.clientDto.LinkUpdateRequest;
 import edu.java.exception.ApiErrorException;
 import edu.java.serviceDto.ApiErrorResponse;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,7 +22,7 @@ public class BotWebClient {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
-    public Optional<String> sendUpdate(LinkUpdateRequest request) {
+    public String sendUpdate(LinkUpdateRequest request) {
         return webClient.post()
             .uri("/updates")
             .body(BodyInserters.fromValue(request))
@@ -32,6 +31,6 @@ public class BotWebClient {
                 .flatMap(errorResponse -> Mono.error(new ApiErrorException(errorResponse)))
             )
             .bodyToMono(String.class)
-            .blockOptional();
+            .block();
     }
 }

@@ -13,13 +13,12 @@ import org.springframework.http.MediaType;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class StackOverflowWebClientTest {
@@ -56,7 +55,7 @@ public class StackOverflowWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        StackOverflowResponse response = stackOverflowClient.fetchLatestAnswer(123L).get();
+        StackOverflowResponse response = stackOverflowClient.fetchLatestAnswer(123L);
 
         assertNotNull(response);
         assertEquals(123L, response.getQuestionId());
@@ -69,7 +68,6 @@ public class StackOverflowWebClientTest {
 
     @Test
     void testFetchLatestAnswerVoidItems() {
-
         Long questionNumber = 123L;
         String responseBody = "{\"items\":[]}";
         wireMockServer.stubFor(get(urlEqualTo(String.format("/questions/%d/answers?pagesize=1&order=desc&" +
@@ -79,8 +77,8 @@ public class StackOverflowWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        Optional<StackOverflowResponse> response = stackOverflowClient.fetchLatestAnswer(questionNumber);
-        assertFalse(response.isPresent());
+       StackOverflowResponse response = stackOverflowClient.fetchLatestAnswer(questionNumber);
+       assertNull(response);
     }
 
     @Test
@@ -95,7 +93,7 @@ public class StackOverflowWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(responseBody)));
 
-        Optional<StackOverflowResponse> response = stackOverflowClient.fetchLatestAnswer(questionNumber);
-        assertFalse(response.isPresent());
+       StackOverflowResponse response = stackOverflowClient.fetchLatestAnswer(questionNumber);
+       assertNull(response);
     }
 }

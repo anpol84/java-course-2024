@@ -1,6 +1,7 @@
 package edu.java.scrapper;
 
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -9,7 +10,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -19,26 +19,34 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 @Testcontainers
-public class IntegrationTest {
+public abstract class IntegrationTest {
     public static PostgreSQLContainer<?> POSTGRES;
+    public static HikariConfig config;
+    public static JdbcTemplate jdbcTemplate;
+    public static HikariDataSource dataSource;
 
     static  {
+
         POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("scrapper")
             .withUsername("postgres")
             .withPassword("postgres");
         POSTGRES.start();
-
+        config = new HikariConfig();
+        config.setJdbcUrl(POSTGRES.getJdbcUrl());
+        config.setUsername(POSTGRES.getUsername());
+        config.setPassword(POSTGRES.getPassword());
+        dataSource = new HikariDataSource(config);
+        jdbcTemplate = new JdbcTemplate(dataSource);
         try {
             runMigrations(POSTGRES);
         } catch (SQLException | LiquibaseException e) {
             throw new RuntimeException(e);
         }
     }
-
 
     private static void runMigrations(JdbcDatabaseContainer<?> c) throws SQLException, LiquibaseException {
         String jdbcUrl = c.getJdbcUrl();
@@ -50,7 +58,6 @@ public class IntegrationTest {
             .username(username)
             .password(password)
             .build();
-
 
         Database database = DatabaseFactory.getInstance()
             .findCorrectDatabaseImplementation(new JdbcConnection(dataSource.getConnection()));
@@ -65,31 +72,5 @@ public class IntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
-    }
-
-
-    @Test
-    public void simpleTest() {
-
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSourceBuilder
-            .create()
-            .url(POSTGRES.getJdbcUrl())
-            .username(POSTGRES.getUsername())
-            .password(POSTGRES.getPassword())
-            .build());
-
-        jdbcTemplate.update("INSERT INTO chat (id) VALUES (?)", 1);
-
-        Integer chatId = jdbcTemplate.queryForObject("SELECT id FROM chat WHERE id = ?", Integer.class, 1);
-        assertEquals(1,chatId);
-
-        jdbcTemplate.update("INSERT INTO link (id, url) VALUES (?, ?)", 1,  "http://example.com");
-
-        String url = jdbcTemplate.queryForObject("SELECT url FROM link WHERE id = ?", String.class, 1);
-        assertEquals("http://example.com", url);
-
-        jdbcTemplate.update("INSERT INTO chat_link (chat_id, link_id) VALUES (?, ?)", 1, 1);
-        Integer linkId = jdbcTemplate.queryForObject("SELECT link_id FROM chat_link WHERE chat_id = ?", Integer.class, 1);
-        assertEquals(1, linkId);
     }
 }

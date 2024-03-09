@@ -14,13 +14,11 @@ import org.springframework.http.MediaType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class BotWebClientTest {
@@ -54,9 +52,8 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Обновление обработано")));
 
-        Optional<String> response = botWebClient.sendUpdate(request);
-        assertTrue(response.isPresent());
-        assertEquals(response.get(), "Обновление обработано");
+        String response = botWebClient.sendUpdate(request);
+        assertEquals(response, "Обновление обработано");
     }
 
     @Test
@@ -118,10 +115,8 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Обновление обработано")));
 
-        Optional<?> response1 = botWebClient.sendUpdate(request);
-        assertTrue(response1.isPresent());
-        assertEquals(response1.get().getClass(), String.class);
-        assertEquals(response1.get(), "Обновление обработано");
+        String response1 = botWebClient.sendUpdate(request);
+        assertEquals(response1, "Обновление обработано");
         wireMockServer.stubFor(post(urlEqualTo("/updates"))
             .willReturn(aResponse()
                 .withStatus(400)

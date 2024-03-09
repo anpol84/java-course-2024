@@ -1,6 +1,7 @@
 package edu.java.controller;
 
-import edu.java.service.ScrapperService;
+import edu.java.service.ChatService;
+import edu.java.service.LinkService;
 import edu.java.serviceDto.AddLinkRequest;
 import edu.java.serviceDto.LinkResponse;
 import edu.java.serviceDto.ListLinksResponse;
@@ -21,35 +22,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class ScrapperController {
-    private final ScrapperService scrapperService;
+    private final ChatService chatService;
+    private final LinkService linkService;
 
     @PostMapping("/tg-chat/{id}")
     public String registerChat(@PathVariable("id") @Min(1) Long id) {
-        scrapperService.registerChat(id);
+        chatService.register(id);
         return "Чат зарегистрирован";
     }
 
     @DeleteMapping("/tg-chat/{id}")
     public String deleteChat(@PathVariable("id") @Min(1) Long id) {
-        scrapperService.deleteChat(id);
+        chatService.unregister(id);
         return "Чат успешно удалён";
     }
 
     @GetMapping("/links")
     public ListLinksResponse getLinks(@RequestHeader("Tg-Chat-Id") @Min(1) Long chatId) {
-        List<LinkResponse> links = scrapperService.getLinks(chatId);
+        List<LinkResponse> links = linkService.listAll(chatId);
         return new ListLinksResponse(links, links.size());
     }
 
     @PostMapping("/links")
     public LinkResponse addLink(@RequestHeader("Tg-Chat-Id") @Min(1) Long chatId,
         @RequestBody @Valid AddLinkRequest request) {
-        return scrapperService.addLink(chatId, request.getLink());
+        return linkService.add(chatId, request.getLink());
     }
 
     @DeleteMapping("/links")
     public LinkResponse removeLink(@RequestHeader("Tg-Chat-Id") @Min(1) Long chatId,
         @RequestBody @Valid RemoveLinkRequest request) {
-        return scrapperService.removeLink(chatId, request.getLink());
+        return linkService.remove(chatId, request.getLink());
     }
+
+
 }

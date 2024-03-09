@@ -1,42 +1,30 @@
 package edu.java.bot.command;
 
-
-import edu.java.bot.dao.LinkDao;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class CommandHolder {
-    private static final List<Command> COMMANDS;
-    private static final Map<String, Command> COMMAND_MAP;
+    private Map<String, Command> commandMap;
 
-    static {
-        COMMANDS = new ArrayList<>();
-        LinkDao linkDao = new LinkDao();
-        COMMANDS.add(new HelpCommand());
-        COMMANDS.add(new StartCommand());
-        COMMANDS.add(new ListCommand(linkDao));
-        COMMANDS.add(new TrackCommand(linkDao));
-        COMMANDS.add(new UntrackCommand(linkDao));
-
-        COMMAND_MAP = new HashMap<>();
-        for (Command command : COMMANDS) {
-            COMMAND_MAP.put(command.command(), command);
+    @Autowired
+    public void setCommandMap(List<Command> commands) {
+        commandMap = new HashMap<>();
+        for (Command command : commands) {
+            commandMap.put(command.command(), command);
         }
     }
 
-    private CommandHolder() {
-
+    public List<Command> getCommands() {
+        return new ArrayList<>(commandMap.values());
     }
 
-    public static List<Command> getCommands() {
-        return COMMANDS;
+    public Command getCommandByName(String commandName) {
+        return commandMap.get(commandName);
     }
-
-
-    public static Command getCommandByName(String commandName) {
-        return COMMAND_MAP.get(commandName);
-    }
-
 }

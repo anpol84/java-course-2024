@@ -4,23 +4,20 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.command.Command;
 import edu.java.bot.command.CommandHolder;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 
-
+@Component
+@RequiredArgsConstructor
 public class TelegramBotMessageProcessor implements MessageProcessor {
-
-
-    @Override
-    public List<? extends Command> commands() {
-        return CommandHolder.getCommands();
-    }
+    private final CommandHolder commandHolder;
 
     @Override
     public SendMessage process(Update update) {
         if (update.message() != null && update.message().text() != null) {
             String commandName = update.message().text().split(" ")[0];
-            Command command = CommandHolder.getCommandByName(commandName);
+            Command command = commandHolder.getCommandByName(commandName);
             if (command != null && command.supports(update)) {
                 return command.handle(update);
             }
@@ -28,5 +25,4 @@ public class TelegramBotMessageProcessor implements MessageProcessor {
         }
         return null;
     }
-
 }

@@ -2,16 +2,17 @@ package edu.java.bot.command;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
-import edu.java.bot.dao.LinkDao;
-import edu.java.bot.utils.UrlUtils;
+import edu.java.bot.client.ScrapperWebClient;
+import edu.java.bot.exception.ApiErrorException;
+import edu.java.bot.exception.NotValidLinkException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 
+@Component
+@RequiredArgsConstructor
 public class UntrackCommand implements Command {
-    private final LinkDao linkDao;
-
-    public UntrackCommand(LinkDao linkDao) {
-        this.linkDao = linkDao;
-    }
+    private final ScrapperWebClient scrapperWebClient;
 
     @Override
     public String command() {
@@ -20,15 +21,18 @@ public class UntrackCommand implements Command {
 
     @Override
     public SendMessage handle(Update update) {
-        String message = update.message().text().split(" ")[1];
-        if (!UrlUtils.isValidUrl(message)) {
-            return new SendMessage(update.message().chat().id(), "It is not valid link");
+
+        try {
+            String messageText = update.message().text().split(" ")[1];
+            scrapperWebClient.removeLink(messageText, update.message().chat().id());
+        } catch (ApiErrorException e) {
+            return new SendMessage(update.message().chat().id(), e.getErrorResponse().getDescription());
+        } catch (NotValidLinkException e) {
+            return new SendMessage(update.message().chat().id(), e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        if (linkDao.deleteResource(update.message().chat().id(),
-            UrlUtils.getDomain(message), UrlUtils.getPath(message))) {
-            return new SendMessage(update.message().chat().id(), "The resource has been deleted");
-        }
-        return new SendMessage(update.message().chat().id(), "There is no such resource");
+        return new SendMessage(update.message().chat().id(), "The resource has been deleted");
     }
 
     @Override
@@ -47,5 +51,4 @@ public class UntrackCommand implements Command {
     public String getDescription() {
         return "This command untracks some link";
     }
-
 }
