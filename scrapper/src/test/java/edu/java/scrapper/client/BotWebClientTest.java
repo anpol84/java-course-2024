@@ -45,7 +45,8 @@ public class BotWebClientTest {
     public void correctBodyTest() throws URISyntaxException {
         ArrayList<Long> list = new ArrayList<>();
         list.add(1L);
-        LinkUpdateRequest request = new LinkUpdateRequest(1L, new URI("1"), "1",list);
+        LinkUpdateRequest request = new LinkUpdateRequest().setId(1L).setUrl(new URI("1")).setDescription("1")
+            .setTgChatIds(list);
         wireMockServer.stubFor(post(urlEqualTo("/updates"))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -59,7 +60,7 @@ public class BotWebClientTest {
     @Test
     public void invalidBodyTest() {
         ArrayList<Long> list = new ArrayList<>();
-        LinkUpdateRequest request = new LinkUpdateRequest(1L, null, "1",list);
+        LinkUpdateRequest request = new LinkUpdateRequest().setId(1L).setDescription("1").setTgChatIds(list);
         String body = """
                 {
                     "description":"some description",
@@ -93,7 +94,8 @@ public class BotWebClientTest {
     public void doubleUpdateTest() throws URISyntaxException {
         ArrayList<Long> list = new ArrayList<>();
         list.add(1L);
-        LinkUpdateRequest request = new LinkUpdateRequest(1L, new URI("1"), "1",list);
+        LinkUpdateRequest request = new LinkUpdateRequest().setId(1L).setUrl(new URI("1")).setDescription("1")
+            .setTgChatIds(list);
         String body = """
                 {
                     "description":"some description",

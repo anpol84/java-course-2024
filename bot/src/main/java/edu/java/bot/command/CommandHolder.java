@@ -1,9 +1,9 @@
 package edu.java.bot.command;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +14,7 @@ public class CommandHolder {
 
     @Autowired
     public void setCommandMap(List<Command> commands) {
-        commandMap = new HashMap<>();
-        for (Command command : commands) {
-            commandMap.put(command.command(), command);
-        }
+       commandMap = commands.stream().collect(Collectors.toMap(Command::command, command -> command));
     }
 
     public List<Command> getCommands() {

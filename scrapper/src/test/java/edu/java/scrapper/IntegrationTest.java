@@ -10,6 +10,9 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -27,9 +30,9 @@ public abstract class IntegrationTest {
     public static HikariConfig config;
     public static JdbcTemplate jdbcTemplate;
     public static HikariDataSource dataSource;
+    public static DSLContext dslContext;
 
     static  {
-
         POSTGRES = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("scrapper")
             .withUsername("postgres")
@@ -41,6 +44,7 @@ public abstract class IntegrationTest {
         config.setPassword(POSTGRES.getPassword());
         dataSource = new HikariDataSource(config);
         jdbcTemplate = new JdbcTemplate(dataSource);
+        dslContext = DSL.using(dataSource, SQLDialect.POSTGRES);
         try {
             runMigrations(POSTGRES);
         } catch (SQLException | LiquibaseException e) {

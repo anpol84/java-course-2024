@@ -8,8 +8,6 @@ public interface LinkUpdater {
 
     boolean support(String url);
 
-    String[] processLink(String link);
-
     String getDomain();
 
     void setLastUpdate(Link link);

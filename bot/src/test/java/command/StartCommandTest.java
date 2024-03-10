@@ -42,14 +42,13 @@ public class StartCommandTest {
 
         when(scrapperWebClient.registerChat(123456789L))
             .thenThrow(new ApiErrorException(
-                new ApiErrorResponse("bad", "400", "name", "message",
-                    List.of("1", "2"))));
+                new ApiErrorResponse().setDescription("bad").setCode("400").setExceptionName("name")
+                    .setExceptionMessage("message").setStacktrace(List.of("1", "2"))));
         try {
             startCommand.handle(update);
         }catch (ApiErrorException e){
             assertEquals("bad", e.getErrorResponse().getDescription());
         }
-
     }
 
     @Test
@@ -58,5 +57,4 @@ public class StartCommandTest {
         StartCommand startCommand = new StartCommand(scrapperWebClient);
         assertEquals(startCommand.getDescription(), "This command registers new user");
     }
-
 }

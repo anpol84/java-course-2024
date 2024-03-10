@@ -3,14 +3,11 @@ package edu.java.clientDto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-
-@AllArgsConstructor
 @Data
-@NoArgsConstructor
+@Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GithubResponse {
 
@@ -27,8 +24,7 @@ public class GithubResponse {
     private OffsetDateTime createdAt;
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Accessors(chain = true)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Repo {
         @JsonProperty("name")
@@ -36,8 +32,7 @@ public class GithubResponse {
     }
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Accessors(chain = true)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Author {
         @JsonProperty("display_login")

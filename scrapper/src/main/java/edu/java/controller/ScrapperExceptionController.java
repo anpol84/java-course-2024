@@ -16,71 +16,53 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 @RestControllerAdvice
 public class ScrapperExceptionController {
     private final static String BAD_REQUEST = "400 BAD_REQUEST";
-    private final static String BAD_PARAMS = "Некорректные параметры запроса";
+    private final static String BAD_PARAMS = "Incorrect request parameters";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(MethodArgumentNotValidException ex) {
-        return new ApiErrorResponse(
-            BAD_PARAMS,
-            ex.getStatusCode().toString(),
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(BAD_PARAMS).setCode(ex.getStatusCode().toString())
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(HandlerMethodValidationException ex) {
-        return new ApiErrorResponse(
-            BAD_PARAMS,
-            ex.getStatusCode().toString(),
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(BAD_PARAMS).setCode(ex.getStatusCode().toString())
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 
     @ExceptionHandler(NumberFormatException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(NumberFormatException ex) {
-        return new ApiErrorResponse(
-            BAD_PARAMS,
-            BAD_REQUEST,
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(BAD_PARAMS).setCode(BAD_REQUEST)
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(BadRequestException ex) {
-        return new ApiErrorResponse(
-            ex.getDescription(),
-            BAD_REQUEST,
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(ex.getDescription()).setCode(BAD_REQUEST)
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleResponseStatusException(NotFoundException ex) {
-        return new ApiErrorResponse(
-            ex.getDescription(),
-            "404 NOT_FOUND",
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(ex.getDescription()).setCode("404 NOT_FOUND")
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(MissingRequestHeaderException ex) {
-        return new ApiErrorResponse(
-            BAD_PARAMS,
-            ex.getStatusCode().toString(),
-            ex.getClass().getSimpleName(),
-            ex.getMessage(),
-            StackTraceUtil.getStringStakeTrace(ex));
+        return new ApiErrorResponse().setDescription(BAD_PARAMS).setCode(ex.getStatusCode().toString())
+            .setExceptionName(ex.getClass().getSimpleName()).setExceptionMessage(ex.getMessage())
+            .setStacktrace(StackTraceUtil.getStringStakeTrace(ex));
     }
 }

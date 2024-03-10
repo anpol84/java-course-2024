@@ -6,8 +6,10 @@ import edu.java.clientDto.StackOverflowResponse;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.repository.jdbc.JdbcLinkRepository;
+import edu.java.repository.jooq.JooqLinkRepository;
 import edu.java.service.updater.StackOverflowLinkUpdater;
 import org.junit.jupiter.api.Test;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,20 +23,20 @@ import static org.mockito.Mockito.when;
 public class StackOverflowUpdaterTest {
 
     StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
-    LinkRepository linkRepository = mock(JdbcLinkRepository.class);
+    LinkRepository linkRepository = mock(JooqLinkRepository.class);
     BotWebClient botWebClient = mock(BotWebClient.class);
 
     @Test
     public void processTest(){
-        Link link = new Link(1L, "https://stackoverflow.com/questions/123", OffsetDateTime.MIN,
-            OffsetDateTime.MAX.minusDays(2));
+        Link link = new Link().setId(1L).setUrl(URI.create("https://stackoverflow.com/questions/123"))
+            .setUpdateAt(OffsetDateTime.MIN).setLastApiUpdate(OffsetDateTime.MAX.minusDays(2));
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
         when(stackOverflowWebClient.fetchLatestAnswer(123L))
-            .thenReturn(new StackOverflowResponse(1L, 1L, null,
-            null,OffsetDateTime.MAX));
-        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
+            .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
+                .setLastActivityDate(OffsetDateTime.MAX));
+        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
         when(botWebClient.sendUpdate(any())).thenReturn("Обновление обработано");
         StackOverflowLinkUpdater stackOverflowLinkUpdater =
             new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
@@ -44,15 +46,15 @@ public class StackOverflowUpdaterTest {
 
     @Test
     public void noProcessTest(){
-        Link link = new Link(1L, "https://stackoverflow.com/questions/123", OffsetDateTime.MAX,
-            OffsetDateTime.MAX);
+        Link link = new Link().setId(1L).setUrl(URI.create("https://stackoverflow.com/questions/123"))
+            .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX);
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
         when(stackOverflowWebClient.fetchLatestAnswer(123L))
-            .thenReturn(new StackOverflowResponse(1L, 1L, null,
-                null,OffsetDateTime.MIN));
-        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
+            .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
+                .setLastActivityDate(OffsetDateTime.MIN));
+        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
         StackOverflowLinkUpdater stackOverflowLinkUpdater =
             new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
         int count = stackOverflowLinkUpdater.process(link);
@@ -67,14 +69,6 @@ public class StackOverflowUpdaterTest {
         assertFalse(flag1);
         boolean flag2 = stackOverflowLinkUpdater.support("https://stackoverflow.com/questions/123");
         assertTrue(flag2);
-    }
-
-    @Test
-    public void processLinkTest(){
-        StackOverflowLinkUpdater stackOverflowLinkUpdater =
-            new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
-        String[] args = stackOverflowLinkUpdater.processLink("https://stackoverflow.com/questions/123");
-        assertEquals("123", args[args.length-1]);
     }
 
     @Test

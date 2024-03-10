@@ -71,7 +71,7 @@ public class ScrapperWebClient {
 
     public LinkResponse addLink(String text, Long id) throws URISyntaxException {
         checkLink(text);
-        AddLinkRequest request = new AddLinkRequest(new URI(text));
+        AddLinkRequest request = new AddLinkRequest().setLink(new URI(text));
         return webClient.post()
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))
@@ -86,7 +86,7 @@ public class ScrapperWebClient {
 
     public LinkResponse removeLink(String text, Long id) throws URISyntaxException {
         checkLink(text);
-        RemoveLinkRequest request = new RemoveLinkRequest(new URI(text));
+        RemoveLinkRequest request = new RemoveLinkRequest().setLink(new URI(text));
         return webClient.method(HttpMethod.DELETE)
             .uri(PATH_TO_LINK)
             .header(HEADER_NAME, String.valueOf(id))

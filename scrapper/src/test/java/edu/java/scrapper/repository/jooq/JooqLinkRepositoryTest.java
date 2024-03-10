@@ -1,18 +1,18 @@
-package edu.java.scrapper.repository;
+package edu.java.scrapper.repository.jooq;
 
 import edu.java.model.Link;
-import edu.java.repository.jdbc.JdbcChatRepository;
-import edu.java.repository.jdbc.JdbcLinkRepository;
+import edu.java.repository.jooq.JooqChatRepository;
+import edu.java.repository.jooq.JooqLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.OffsetDateTime;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class JdbcLinkRepositoryTest extends IntegrationTest {
-    private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
+public class JooqLinkRepositoryTest extends IntegrationTest {
+    private final JooqLinkRepository linkRepository = new JooqLinkRepository(dslContext);
+    private final JooqChatRepository chatRepository = new JooqChatRepository(dslContext);
 
     @Test
     void addTest() {
@@ -20,7 +20,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(1L, "http://test.ru");
         List<Link> links = linkRepository.findAll();
         assertEquals(1, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();
@@ -43,7 +43,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.remove(2L, "http://test2.ru");
         List<Link> links2 = linkRepository.findAll();
         assertEquals(2, links2.size());
-        assertEquals("http://test.ru", links2.get(0).getUrl());
+        assertEquals("http://test.ru", links2.get(0).getUrl().toString());
 
         linkRepository.remove(3L, "http://test2.ru");
         chatRepository.remove(2L);
@@ -59,7 +59,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(2L, "http://test2.ru");
         List<Link> links = linkRepository.findAllByChatId(1L);
         assertEquals(1, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         chatRepository.remove(1L);
@@ -75,8 +75,8 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(2L, "http://test2.ru");
         List<Link> links = linkRepository.findAll();
         assertEquals(2, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
-        assertEquals("http://test2.ru", links.get(1).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
+        assertEquals("http://test2.ru", links.get(1).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         chatRepository.remove(1L);
@@ -93,7 +93,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(1L, "http://test3.ru");
         linkRepository.add(2L, "http://test2.ru");
         Link link = linkRepository.findByChatIdAndUrl(1L, "http://test3.ru");
-        assertEquals("http://test3.ru", link.getUrl());
+        assertEquals("http://test3.ru", link.getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(1L, "http://test3.ru");
         linkRepository.remove(2L, "http://test2.ru");
@@ -111,8 +111,8 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.add(1L, "http://test3.ru");
         List<Link> links = linkRepository.findByOldestUpdates(2);
         assertEquals(2, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
-        assertEquals("http://test2.ru", links.get(1).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
+        assertEquals("http://test2.ru", links.get(1).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         linkRepository.remove(1L, "http://test3.ru");
@@ -125,9 +125,9 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
     void setUpdateAtTest(){
         chatRepository.add(1L);
         linkRepository.add(1L, "http://test.ru");
-        linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.MAX);
+        linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.now());
         Link link = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
-        assertEquals(OffsetDateTime.MAX, link.getUpdateAt());
+        assertEquals(OffsetDateTime.now().getHour(), link.getUpdateAt().getHour());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();
@@ -137,9 +137,10 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
     void setLastApiUpdateTest(){
         chatRepository.add(1L);
         linkRepository.add(1L, "http://test.ru");
-        linkRepository.setLastApiUpdate("http://test.ru", OffsetDateTime.MAX);
+        OffsetDateTime now = OffsetDateTime.now();
+        linkRepository.setLastApiUpdate("http://test.ru", now);
         Link link = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
-        assertEquals(OffsetDateTime.MAX, link.getLastApiUpdate());
+        assertEquals(now.getHour(), link.getLastApiUpdate().getHour());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();

@@ -4,12 +4,11 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
+@Accessors(chain = true)
 public class LinkUpdateRequest {
     @NotNull
     private Long id;
