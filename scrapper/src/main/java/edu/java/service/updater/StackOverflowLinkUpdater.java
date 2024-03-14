@@ -35,8 +35,11 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = jooqLinkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdate(new LinkUpdateRequest().setId(link.getId()).setUrl(link.getUrl())
-                    .setDescription(getDescription(stackOverflowResponse)).setTgChatIds(chatIds));
+                botWebClient.sendUpdate(new LinkUpdateRequest()
+                    .setId(link.getId())
+                    .setUrl(link.getUrl())
+                    .setDescription(getDescription(stackOverflowResponse))
+                    .setTgChatIds(chatIds));
             } catch (Exception ignored) {
 
             }
@@ -72,8 +75,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         if (body.length() > MAXIMUM_BODY_SIZE) {
             body = body.substring(0, MAXIMUM_BODY_SIZE) + "...";
         }
-        return "Link: " + link + "\n" +  "New answer for question №" + stackOverflowResponse.getQuestionId()
-            + "\nBy: " + stackOverflowResponse.getOwner().getDisplayName()
-            + "\nWith body:\n" + body;
+        return String.format("Link: %s\nNew answer for question №%s\nBy: %s\nWith body:\n%s", link,
+            stackOverflowResponse.getQuestionId(), stackOverflowResponse.getOwner().getDisplayName(), body);
     }
 }

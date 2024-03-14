@@ -18,7 +18,8 @@ public class BotExceptionController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(MethodArgumentNotValidException ex) {
-        return new ApiErrorResponse().setDescription(BAD_PARAMS)
+        return new ApiErrorResponse()
+            .setDescription(BAD_PARAMS)
             .setCode(ex.getStatusCode().toString())
             .setExceptionName(ex.getClass().getSimpleName())
             .setExceptionMessage(ex.getMessage())
@@ -28,7 +29,8 @@ public class BotExceptionController {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleResponseStatusException(BadRequestException ex) {
-        return new ApiErrorResponse().setDescription(ex.getDescription())
+        return new ApiErrorResponse()
+            .setDescription(ex.getDescription())
             .setCode(BAD_REQUEST)
             .setExceptionName(ex.getClass().getSimpleName())
             .setExceptionMessage(ex.getMessage())

@@ -39,7 +39,6 @@ public class BotImpl implements Bot {
     @Override
     public int process(List<Update> updates) {
         for (Update update : updates) {
-
             SendMessage response = messageProcessor.process(update);
             if (response != null) {
                bot.execute(response);

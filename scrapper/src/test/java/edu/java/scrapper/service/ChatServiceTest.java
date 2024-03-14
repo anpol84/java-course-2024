@@ -7,6 +7,7 @@ import edu.java.repository.jooq.JooqChatRepository;
 import edu.java.service.ChatService;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,7 +20,7 @@ public class ChatServiceTest {
         ChatRepository chatRepository = mock(JooqChatRepository.class);
         ChatService chatService = new ChatService(chatRepository);
         chatService.register(1L);
-        verify(chatRepository).add(1L);
+        verify(chatRepository).add(any());
     }
 
     @Test
@@ -29,7 +30,7 @@ public class ChatServiceTest {
         doAnswer(invocation -> {
             throw new BadRequestException("The chat is already registered",
                 "It is not possible to re-register the chat");
-        }).when(chatRepository).add(1L);
+        }).when(chatRepository).add(any());
         try {
             chatService.register(1L);
         }catch (BadRequestException e){

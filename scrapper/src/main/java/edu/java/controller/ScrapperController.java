@@ -40,7 +40,9 @@ public class ScrapperController {
     @GetMapping("/links")
     public ListLinksResponse getLinks(@RequestHeader("Tg-Chat-Id") @Min(1) Long chatId) {
         List<LinkResponse> links = linkService.listAll(chatId);
-        return new ListLinksResponse().setLinks(links).setSize(links.size());
+        return new ListLinksResponse()
+            .setLinks(links)
+            .setSize(links.size());
     }
 
     @PostMapping("/links")
