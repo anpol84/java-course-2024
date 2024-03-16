@@ -2,6 +2,7 @@ package edu.java.service;
 
 import edu.java.exception.BadRequestException;
 import edu.java.exception.NotFoundException;
+import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.service.updater.LinkHolder;
@@ -12,63 +13,75 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 @RequiredArgsConstructor
 public class LinkService {
-    private final LinkRepository linkRepository;
+    private final LinkRepository jooqLinkRepository;
     private final LinkHolder linkHolder;
-    private final static String CHAT_NOT_EXIST = "Такого чата не существует";
-    private final static String STACKOVERFLOW_REGEX = "https://stackoverflow\\.com/questions/\\d+";
-    private final static String GITHUB_REGEX = "https://github\\.com/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+";
-    private final static String NO_CHAT_MESSAGE =
+    private final static String CHAT_NOT_EXIST = "There is no such chat";
+
+    private final static String NO_CHAT_MESSAGE_JDBC =
         "ERROR: insert or update on table \"chat_link\" violates foreign key constraint \"fk_chat_id\"";
     private final static String DUPLICATE_MESSAGE =
         "ERROR: duplicate key value violates unique constraint \"chat_link_pkey\"";
+    private final static String NO_CHAT_MESSAGE_JOOQ =
+        "is not present in table \"chat\"";
 
+    @Transactional(rollbackFor = Exception.class)
     public LinkResponse add(long tgChatId, URI url) {
-        if (!url.toString().matches(STACKOVERFLOW_REGEX) && !url.toString().matches(GITHUB_REGEX)) {
-            throw new BadRequestException("Плохая ссылка", "Данная ссылка не поддерживается");
+        if (!LinkUtils.validateLink(url.toString())) {
+            throw new BadRequestException("Bad link", "This link is not supported");
         }
         try {
-            Link link = linkRepository.add(tgChatId, url.toString());
-            if (link.getLastApiUpdate().equals(OffsetDateTime.MIN)) {
+            Link link = jooqLinkRepository.getOrCreate(new Link().setUrl(url));
+            link = jooqLinkRepository.insert(new Chat().setId(tgChatId), link);
+            if (link.getLastApiUpdate() == null) {
                 String domain = LinkUtils.extractDomainFromUrl(url.toString());
                 LinkUpdater updater = linkHolder.getUpdaterByDomain(domain);
                 updater.setLastUpdate(link);
             }
             return mapToLinkResponse(link);
-        } catch (DataIntegrityViolationException ex) {
-            if (ex.getMessage().contains(NO_CHAT_MESSAGE)) {
+        } catch (DataIntegrityViolationException | IntegrityConstraintViolationException ex) {
+            if (ex.getMessage().contains(NO_CHAT_MESSAGE_JDBC) || ex.getMessage().contains(NO_CHAT_MESSAGE_JOOQ)) {
                 throw new NotFoundException(CHAT_NOT_EXIST,
-                    "Бот не доступен до команды /start. Введите ее, чтобы начать работу с ботом");
-            } else if (ex.getMessage().contains(DUPLICATE_MESSAGE)) {
-                throw new BadRequestException("Ссылка уже существует", "Повторное добавление ссылки невозможно");
+                    "The bot is not available until the /start command. Enter it to start working with the bot");
+            } else if (ex.getMessage().contains(DUPLICATE_MESSAGE)
+                || ex.getMessage().contains(DUPLICATE_MESSAGE)) {
+                throw new BadRequestException("The link already exists", "It is not possible to add the link again");
             } else {
                 throw new RuntimeException();
             }
         }
     }
 
+    @Transactional
     public LinkResponse remove(long tgChatId, URI url) {
-
-        int count = linkRepository.remove(tgChatId, url.toString());
+        int count = jooqLinkRepository.remove(tgChatId, url.toString());
         if (count == 0) {
-            throw new NotFoundException("Ресурса не существует", "Чат или ссылка были не найдены");
+            throw new NotFoundException("The resource does not exist", "The chat or link was not found");
         }
-        return mapToLinkResponse(new Link(tgChatId, url.toString(), OffsetDateTime.MIN, OffsetDateTime.MAX));
+        return mapToLinkResponse(new Link()
+            .setId(tgChatId)
+            .setUrl(url)
+            .setUpdateAt(OffsetDateTime.MIN)
+            .setLastApiUpdate(OffsetDateTime.MAX));
     }
 
     public List<LinkResponse> listAll(long tgChatId) {
-        return linkRepository.findAllByChatId(tgChatId).stream().map(this::mapToLinkResponse).toList();
+        return jooqLinkRepository.findAllByChatId(tgChatId).stream().map(this::mapToLinkResponse).toList();
     }
 
     private LinkResponse mapToLinkResponse(Link link) {
         try {
-            return new LinkResponse(link.getId(), new URI(link.getUrl()));
+            return new LinkResponse()
+                .setId(link.getId())
+                .setUrl(link.getUrl());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

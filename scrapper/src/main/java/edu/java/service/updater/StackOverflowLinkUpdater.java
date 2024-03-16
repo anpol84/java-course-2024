@@ -6,34 +6,44 @@ import edu.java.clientDto.LinkUpdateRequest;
 import edu.java.clientDto.StackOverflowResponse;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
-import java.net.URI;
+import edu.java.utils.LinkUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 @RequiredArgsConstructor
 public class StackOverflowLinkUpdater implements LinkUpdater {
-    private final LinkRepository linkRepository;
+    private final LinkRepository jooqLinkRepository;
     private final StackOverflowWebClient stackOverflowWebClient;
     private final BotWebClient botWebClient;
+    private final static int MAXIMUM_BODY_SIZE = 20;
+    private final static String URL = "https://stackoverflow.com/questions/";
 
     @Override
+    @Transactional
     public int process(Link link) {
-        String[] args = processLink(link.getUrl());
-        long number = Long.parseLong(args[args.length - 1]);
+        String questionNumber = LinkUtils.extractStackOverflowInfoFromUrl(link.getUrl().toString());
+        long number = Long.parseLong(questionNumber);
         StackOverflowResponse stackOverflowResponse =
             stackOverflowWebClient.fetchLatestAnswer(number);
+        if (link.getLastApiUpdate() == null) {
+            return 0;
+        }
         if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
-            List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl());
+            List<Long> chatIds = jooqLinkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdate(new LinkUpdateRequest(link.getId(), new URI(link.getUrl()),
-                    getDescription(stackOverflowResponse), chatIds));
+                botWebClient.sendUpdate(new LinkUpdateRequest()
+                    .setId(link.getId())
+                    .setUrl(link.getUrl())
+                    .setDescription(getDescription(stackOverflowResponse))
+                    .setTgChatIds(chatIds));
             } catch (Exception ignored) {
 
             }
-            linkRepository.setLastApiUpdate(link.getUrl(), stackOverflowResponse.getLastActivityDate());
+            jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
             return 1;
         }
         return 0;
@@ -41,12 +51,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
 
     @Override
     public boolean support(String url) {
-        return  url.startsWith("https://stackoverflow.com/questions/");
-    }
-
-    @Override
-    public String[] processLink(String url) {
-        return url.split("/");
+        return  url.startsWith(URL);
     }
 
     @Override
@@ -55,17 +60,22 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
     }
 
     @Override
+    @Transactional
     public void setLastUpdate(Link link) {
-        String[] args = processLink(link.getUrl());
-        long number = Long.parseLong(args[args.length - 1]);
+        String questionNumber = LinkUtils.extractStackOverflowInfoFromUrl(link.getUrl().toString());
+        long number = Long.parseLong(questionNumber);
         StackOverflowResponse stackOverflowResponse =
             stackOverflowWebClient.fetchLatestAnswer(number);
-        linkRepository.setLastApiUpdate(link.getUrl(), stackOverflowResponse.getLastActivityDate());
+        jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
     }
 
     private String getDescription(StackOverflowResponse stackOverflowResponse) {
-        return "New answer for question №" + stackOverflowResponse.getQuestionId()
-            + "\nBy: " + stackOverflowResponse.getOwner().getDisplayName()
-            + "\nWith body:\n" + stackOverflowResponse.getBody();
+        String link = URL + stackOverflowResponse.getQuestionId();
+        String body = stackOverflowResponse.getBody();
+        if (body.length() > MAXIMUM_BODY_SIZE) {
+            body = body.substring(0, MAXIMUM_BODY_SIZE) + "...";
+        }
+        return String.format("Link: %s\nNew answer for question №%s\nBy: %s\nWith body:\n%s", link,
+            stackOverflowResponse.getQuestionId(), stackOverflowResponse.getOwner().getDisplayName(), body);
     }
 }

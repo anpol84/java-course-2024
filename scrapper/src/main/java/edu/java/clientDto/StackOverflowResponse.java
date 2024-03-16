@@ -3,14 +3,11 @@ package edu.java.clientDto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.OffsetDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackOverflowResponse {
     @JsonProperty("question_id")
@@ -27,8 +24,7 @@ public class StackOverflowResponse {
     private OffsetDateTime lastActivityDate;
 
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Accessors(chain = true)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Owner {
         @JsonProperty("display_name")

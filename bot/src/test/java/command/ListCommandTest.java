@@ -31,7 +31,8 @@ public class ListCommandTest {
         Chat chat = mock(Chat.class);
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn(new ListLinksResponse(new ArrayList<>(), 0));
+        when(scrapperWebClient.getLinks(123456789L)).thenReturn( new ListLinksResponse().setLinks(new ArrayList<>())
+            .setSize(0));
         ListCommand listCommand = new ListCommand(scrapperWebClient);
 
         SendMessage sendMessage = listCommand.handle(update);
@@ -48,9 +49,9 @@ public class ListCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn(new ListLinksResponse(
-            List.of(new LinkResponse(1L, new URI("url1")), new LinkResponse(2L, new URI("url2"))),
-            2));
+        when(scrapperWebClient.getLinks(123456789L)).thenReturn(new ListLinksResponse().setLinks(
+            List.of(new LinkResponse().setId(1L).setUrl(new URI("url1")), new LinkResponse().setId(2L)
+                .setUrl(new URI("url2")))).setSize(2));
         ListCommand listCommand = new ListCommand(scrapperWebClient);
 
         SendMessage sendMessage = listCommand.handle(update);
@@ -72,6 +73,4 @@ public class ListCommandTest {
         Command command = new ListCommand(scrapperWebClient);
         assertEquals("This command returns list of tracks", command.getDescription());
     }
-
-
 }

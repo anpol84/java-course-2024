@@ -1,5 +1,6 @@
 package edu.java.repository;
 
+import edu.java.model.Chat;
 import edu.java.model.Link;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.List;
 
 public interface LinkRepository {
 
-    Link add(Long chatId, String url);
+    Link getOrCreate(Link link);
+
+    Link insert(Chat chat, Link link);
 
     int remove(Long chatId, String url);
 

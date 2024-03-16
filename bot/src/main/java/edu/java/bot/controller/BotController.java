@@ -21,6 +21,6 @@ public class BotController {
         for (Long chat : linkUpdate.getTgChatIds()) {
             bot.sendMessageToChat(String.valueOf(chat), linkUpdate.getDescription());
         }
-        return "Обновление обработано";
+        return "The update has been processed";
     }
 }

@@ -2,25 +2,23 @@ package edu.java.scrapper.service;
 
 import edu.java.exception.BadRequestException;
 import edu.java.exception.NotFoundException;
+import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
-import edu.java.repository.jdbc.JdbcLinkRepository;
+import edu.java.repository.jooq.JooqLinkRepository;
 import edu.java.service.LinkService;
 import edu.java.service.updater.LinkHolder;
 import edu.java.service.updater.LinkUpdater;
 import edu.java.serviceDto.LinkResponse;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DataIntegrityViolationException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,9 +29,10 @@ public class LinkServiceTest {
 
     @Test
     public void correctListAllTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
         when(linkRepository.findAllByChatId(1L))
-            .thenReturn(List.of(new Link(1L, "some", OffsetDateTime.MAX, OffsetDateTime.MIN)));
+            .thenReturn(List.of(new Link().setId(1L).setUrl(URI.create("some")).setUpdateAt(OffsetDateTime.MAX)
+                .setLastApiUpdate(OffsetDateTime.MIN)));
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         List<LinkResponse> links = linkService.listAll(1L);
         assertEquals(1, links.size());
@@ -43,17 +42,17 @@ public class LinkServiceTest {
 
     @Test
     public void noChatAddTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
-        when(linkRepository.add(1L, "https://github.com/some/some"))
-            .thenThrow(new DataIntegrityViolationException("ERROR: insert or update on table \"chat_link\" " +
-                "violates foreign key constraint \"fk_chat_id\""));
+        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/some/some"))))
+            .thenThrow(new NotFoundException("There is no such chat",
+                "The bot is not available until the /start command. Enter it to start working with the bot" ));
         try {
             LinkResponse link = linkService.add(1L, new URI("https://github.com/some/some"));
         }catch (NotFoundException e){
-            assertEquals(e.getMessage(), "Такого чата не существует");
+            assertEquals(e.getMessage(), "There is no such chat");
             assertEquals(e.getDescription(),
-                "Бот не доступен до команды /start. Введите ее, чтобы начать работу с ботом");
+                "The bot is not available until the /start command. Enter it to start working with the bot");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -61,13 +60,13 @@ public class LinkServiceTest {
 
     @Test
     public void badLinkAddTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         try {
             LinkResponse link = linkService.add(1L, new URI("http://example.ru"));
         }catch (BadRequestException e){
-            assertEquals(e.getMessage(), "Плохая ссылка");
-            assertEquals(e.getDescription(),  "Данная ссылка не поддерживается");
+            assertEquals(e.getMessage(), "Bad link");
+            assertEquals(e.getDescription(),  "This link is not supported");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -75,10 +74,9 @@ public class LinkServiceTest {
 
     @Test
     public void linkAlreadyExistAddTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        when(linkRepository.add(1L, "https://github.com/anpol84/test"))
-            .thenThrow(new DataIntegrityViolationException("ERROR: duplicate key value" +
-                " violates unique constraint \"chat_link_pkey\""));
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
+        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/anpol84/test"))))
+            .thenThrow(new BadRequestException("The link already exists", "It is not possible to add the link again"));
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         LinkUpdater linkUpdater = mock(LinkUpdater.class);
@@ -87,8 +85,8 @@ public class LinkServiceTest {
         try {
             LinkResponse link = linkService.add(1L, new URI("https://github.com/anpol84/test"));
         }catch (BadRequestException e){
-            assertEquals(e.getMessage(), "Ссылка уже существует");
-            assertEquals(e.getDescription(),  "Повторное добавление ссылки невозможно");
+            assertEquals(e.getMessage(), "The link already exists");
+            assertEquals(e.getDescription(),  "It is not possible to add the link again");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -96,9 +94,13 @@ public class LinkServiceTest {
 
     @Test
     public void correctAddTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        when(linkRepository.add(1L, "https://github.com/anpol84/test"))
-            .thenReturn(new Link(1L, "https://github.com/anpol84/test", OffsetDateTime.MAX, OffsetDateTime.MAX));
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
+        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/anpol84/test"))))
+            .thenReturn(new Link().setId(1L).setUrl(URI.create("https://github.com/anpol84/test"))
+                .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX));
+        when(linkRepository.insert(any(), any()))
+            .thenReturn(new Link().setId(1L).setUrl(URI.create("https://github.com/anpol84/test"))
+            .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX));
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         LinkUpdater linkUpdater = mock(LinkUpdater.class);
@@ -115,23 +117,23 @@ public class LinkServiceTest {
 
     @Test
     public void badDataRemoveTest(){
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        when(linkRepository.add(1L, "https://github.com/some/some"))
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
+        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/some/some"))))
             .thenThrow(new RuntimeException());
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         try {
             LinkResponse link = linkService.remove(1L, new URI("https://github.com/some/some"));
         }catch (NotFoundException e){
-            assertEquals(e.getMessage(), "Ресурса не существует");
-            assertEquals(e.getDescription(),  "Чат или ссылка были не найдены");
+            assertEquals(e.getMessage(), "The resource does not exist");
+            assertEquals(e.getDescription(),  "The chat or link was not found");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void correctRemoveTest() throws URISyntaxException {
-        LinkRepository linkRepository = mock(JdbcLinkRepository.class);
+    public void correctRemoveTest() {
+        LinkRepository linkRepository = mock(JooqLinkRepository.class);
         when(linkRepository.remove(1L, "https://github.com/anpol84/test"))
             .thenReturn(1);
         LinkService linkService = new LinkService(linkRepository, linkHolder);

@@ -41,7 +41,7 @@ public class BotImpl implements Bot {
         for (Update update : updates) {
             SendMessage response = messageProcessor.process(update);
             if (response != null) {
-                bot.execute(response);
+               bot.execute(response);
             }
         }
         return updates.get(updates.size() - 1).updateId();

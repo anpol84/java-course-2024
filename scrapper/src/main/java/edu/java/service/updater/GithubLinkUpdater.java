@@ -6,32 +6,42 @@ import edu.java.clientDto.GithubResponse;
 import edu.java.clientDto.LinkUpdateRequest;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
-import java.net.URI;
+import edu.java.serviceDto.GithubInfo;
+import edu.java.utils.LinkUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 @RequiredArgsConstructor
 public class GithubLinkUpdater implements LinkUpdater {
     private final GithubWebClient githubWebClient;
-    private final LinkRepository linkRepository;
+    private final LinkRepository jooqLinkRepository;
     private final BotWebClient botWebClient;
+    private final static String URL = "https://github.com/";
 
     @Override
+    @Transactional
     public int process(Link link) {
-        String[] args = processLink(link.getUrl());
+        GithubInfo info = LinkUtils.extractGithubInfoFromUrl(link.getUrl().toString());
+        if (link.getLastApiUpdate() == null) {
+            return 0;
+        }
         GithubResponse githubResponse =
-            githubWebClient.fetchLatestRepositoryActivity(args[0], args[1]);
+            githubWebClient.fetchLatestRepositoryActivity(info.getRepository(), info.getAccount());
         if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
-            List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl());
+            List<Long> chatIds = jooqLinkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdate(new LinkUpdateRequest(link.getId(), new URI(link.getUrl()),
-                    getDescription(githubResponse), chatIds));
+                botWebClient.sendUpdate(new LinkUpdateRequest()
+                    .setId(link.getId())
+                    .setUrl(link.getUrl())
+                    .setDescription(getDescription(githubResponse))
+                    .setTgChatIds(chatIds));
             } catch (Exception ignored) {
             }
-            linkRepository.setLastApiUpdate(link.getUrl(), githubResponse.getCreatedAt());
+            jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
             return 1;
         }
         return 0;
@@ -39,16 +49,9 @@ public class GithubLinkUpdater implements LinkUpdater {
 
     @Override
     public boolean support(String url) {
-        return url.startsWith("https://github.com/");
+        return url.startsWith(URL);
     }
 
-    @Override
-    public String[] processLink(String url) {
-        String[] parts = url.split("/");
-        String repositoryName = parts[parts.length - 1];
-        String accountName = parts[parts.length - 2];
-        return new String[]{repositoryName, accountName};
-    }
 
     @Override
     public String getDomain() {
@@ -56,16 +59,22 @@ public class GithubLinkUpdater implements LinkUpdater {
     }
 
     @Override
+    @Transactional
     public void setLastUpdate(Link link) {
-        String[] args = processLink(link.getUrl());
+        GithubInfo info = LinkUtils.extractGithubInfoFromUrl(link.getUrl().toString());
         GithubResponse githubResponse =
-            githubWebClient.fetchLatestRepositoryActivity(args[0], args[1]);
-        linkRepository.setLastApiUpdate(link.getUrl(), githubResponse.getCreatedAt());
+            githubWebClient.fetchLatestRepositoryActivity(info.getRepository(), info.getAccount());
+        if (githubResponse == null) {
+            return;
+        }
+        jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
     }
 
     private String getDescription(GithubResponse githubResponse) {
-        return githubResponse.getType() + "\n"
-            + "In repository: " + githubResponse.getRepo() + "\n"
-            + "By: " + githubResponse.getAuthor();
+        String link = URL + githubResponse.getRepo().getRepositoryName();
+        GithubEventEnum eventType = GithubEventEnum.fromType(githubResponse.getType());
+        String event = eventType.getDescription();
+        return String.format("Link: %s\n%s\nIn repository: %s\nBy: %s", link, event,
+            githubResponse.getRepo().getRepositoryName(), githubResponse.getAuthor().getAuthorName());
     }
 }

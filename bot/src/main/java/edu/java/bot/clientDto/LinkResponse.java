@@ -1,12 +1,11 @@
 package edu.java.bot.clientDto;
 
 import java.net.URI;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
+@Accessors(chain = true)
 public class LinkResponse {
     private Long id;
     private URI url;

@@ -1,14 +1,12 @@
 package edu.java.bot.clientDto;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.experimental.Accessors;
 
 @Data
-@AllArgsConstructor
+@Accessors(chain = true)
 public class ListLinksResponse {
-
     private List<LinkResponse> links;
 
     private int size;
