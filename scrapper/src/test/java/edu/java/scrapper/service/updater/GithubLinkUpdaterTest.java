@@ -28,7 +28,7 @@ public class GithubLinkUpdaterTest {
 
     @Test
     public void processTest(){
-        Link link = new Link().setId(1L).setUrl(URI.create("https://github.com/some/some"))
+        Link link = new Link().setId(1L).setUrl("https://github.com/some/some")
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX.minusDays(2));
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
@@ -36,7 +36,7 @@ public class GithubLinkUpdaterTest {
         when(githubWebClient.fetchLatestRepositoryActivity("some",
             "some")).thenReturn(
                 new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MAX));
-        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
+        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
         when(botWebClient.sendUpdate(any())).thenReturn("Обновление обработано");
         GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,botWebClient);
         int count = githubLinkUpdater.process(link);
@@ -45,14 +45,14 @@ public class GithubLinkUpdaterTest {
 
     @Test
     public void noProcessTest(){
-        Link link = new Link().setId(1L).setUrl(URI.create("https://github.com/some/some"))
+        Link link = new Link().setId(1L).setUrl("https://github.com/some/some")
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX);
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
         when(githubWebClient.fetchLatestRepositoryActivity("some",
             "some")).thenReturn(new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MIN));
-        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
+        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
         GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,botWebClient);
         int count = githubLinkUpdater.process(link);
         assertEquals(0, count);

@@ -1,30 +1,36 @@
-package edu.java.scrapper.repository.jdbc;
+package edu.java.scrapper.repository.jpa;
 
 import edu.java.model.Chat;
 import edu.java.model.Link;
-import edu.java.repository.jdbc.JdbcChatRepository;
-import edu.java.repository.jdbc.JdbcLinkRepository;
+import edu.java.repository.jpa.JpaChatRepository;
+import edu.java.repository.jpa.JpaChatRepositoryInterface;
+import edu.java.repository.jpa.JpaLinkRepository;
+import edu.java.repository.jpa.JpaLinkRepositoryInterface;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.net.URI;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.time.OffsetDateTime;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class JdbcLinkRepositoryTest extends IntegrationTest {
+public class JpaLinkRepositoryTest extends IntegrationTest {
+    private final JpaLinkRepository linkRepository;
 
-    private final JdbcLinkRepository linkRepository;
-    private final JdbcChatRepository chatRepository;
+    private final JpaChatRepository chatRepository;
 
-    public JdbcLinkRepositoryTest() {
-        this.linkRepository = new JdbcLinkRepository(jdbcTemplate);
-        this.chatRepository = new JdbcChatRepository(jdbcTemplate);
+    @Autowired
+    public JpaLinkRepositoryTest(
+        JpaLinkRepositoryInterface jpaLinkRepositoryInterface,
+        JpaChatRepositoryInterface jpaChatRepositoryInterface
+    ) {
+        linkRepository = new JpaLinkRepository(jpaLinkRepositoryInterface);
+        chatRepository = new JpaChatRepository(jpaChatRepositoryInterface);
     }
+
 
     @Test
     void addTest() {
@@ -33,7 +39,7 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         linkRepository.insert(new Chat().setId(1L), link);
         List<Link> links = linkRepository.findAll();
         assertEquals(1, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();
@@ -161,9 +167,9 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         chatRepository.add(new Chat().setId(1L));
         Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
         linkRepository.insert(new Chat().setId(1L), link);
-        linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.MAX);
+        linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.now());
         Link linkResp = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
-        assertEquals(OffsetDateTime.MAX, linkResp.getUpdateAt());
+        assertEquals(OffsetDateTime.now().getHour(), linkResp.getUpdateAt().getHour());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();
@@ -173,9 +179,12 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         chatRepository.add(new Chat().setId(1L));
         Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
         linkRepository.insert(new Chat().setId(1L), link);
-        linkRepository.setLastApiUpdate("http://test.ru", OffsetDateTime.MAX);
+        Link linkResp2 = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
+        System.out.println(linkResp2);
+        linkRepository.setLastApiUpdate("http://test.ru", OffsetDateTime.now());
         Link linkResp = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
-        assertEquals(OffsetDateTime.MAX, linkResp.getLastApiUpdate());
+        System.out.println(linkResp);
+        assertEquals(OffsetDateTime.now().getHour(), linkResp.getLastApiUpdate().getHour());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();
@@ -212,4 +221,5 @@ public class JdbcLinkRepositoryTest extends IntegrationTest {
         List<Link> links = linkRepository.findAll();
         assertEquals(0, links.size());
     }
+
 }

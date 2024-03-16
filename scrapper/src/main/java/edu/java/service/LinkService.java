@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class LinkService {
-    private final LinkRepository jooqLinkRepository;
+    private final LinkRepository linkRepository;
     private final LinkHolder linkHolder;
     private final static String CHAT_NOT_EXIST = "There is no such chat";
 
@@ -39,8 +39,8 @@ public class LinkService {
             throw new BadRequestException("Bad link", "This link is not supported");
         }
         try {
-            Link link = jooqLinkRepository.getOrCreate(new Link().setUrl(url));
-            link = jooqLinkRepository.insert(new Chat().setId(tgChatId), link);
+            Link link = linkRepository.getOrCreate(new Link().setUrl(url.toString()));
+            link = linkRepository.insert(new Chat().setId(tgChatId), link);
             if (link.getLastApiUpdate() == null) {
                 String domain = LinkUtils.extractDomainFromUrl(url.toString());
                 LinkUpdater updater = linkHolder.getUpdaterByDomain(domain);
@@ -62,26 +62,26 @@ public class LinkService {
 
     @Transactional
     public LinkResponse remove(long tgChatId, URI url) {
-        int count = jooqLinkRepository.remove(tgChatId, url.toString());
+        int count = linkRepository.remove(tgChatId, url.toString());
         if (count == 0) {
             throw new NotFoundException("The resource does not exist", "The chat or link was not found");
         }
         return mapToLinkResponse(new Link()
             .setId(tgChatId)
-            .setUrl(url)
+            .setUrl(url.toString())
             .setUpdateAt(OffsetDateTime.MIN)
             .setLastApiUpdate(OffsetDateTime.MAX));
     }
 
     public List<LinkResponse> listAll(long tgChatId) {
-        return jooqLinkRepository.findAllByChatId(tgChatId).stream().map(this::mapToLinkResponse).toList();
+        return linkRepository.findAllByChatId(tgChatId).stream().map(this::mapToLinkResponse).toList();
     }
 
     private LinkResponse mapToLinkResponse(Link link) {
         try {
             return new LinkResponse()
                 .setId(link.getId())
-                .setUrl(link.getUrl());
+                .setUrl(URI.create(link.getUrl()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

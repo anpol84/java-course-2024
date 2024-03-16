@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatService {
 
-    private final ChatRepository jooqChatRepository;
+    private final ChatRepository chatRepository;
 
     @Transactional
     public void register(Long tgChatId) {
         try {
-            jooqChatRepository.add(new Chat().setId(tgChatId));
+            chatRepository.add(new Chat().setId(tgChatId));
         } catch (DataIntegrityViolationException | IntegrityConstraintViolationException e) {
             throw new BadRequestException("The chat is already registered",
                 "It is not possible to re-register the chat");
@@ -28,7 +28,7 @@ public class ChatService {
 
     @Transactional
     public void unregister(Long tgChatId) {
-        int count = jooqChatRepository.remove(tgChatId);
+        int count = chatRepository.remove(tgChatId);
         if (count == 0) {
             throw new NotFoundException("There is no such chat", "Deleting a non-existent chat is not possible");
         }

@@ -31,7 +31,7 @@ public class LinkServiceTest {
     public void correctListAllTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
         when(linkRepository.findAllByChatId(1L))
-            .thenReturn(List.of(new Link().setId(1L).setUrl(URI.create("some")).setUpdateAt(OffsetDateTime.MAX)
+            .thenReturn(List.of(new Link().setId(1L).setUrl("some").setUpdateAt(OffsetDateTime.MAX)
                 .setLastApiUpdate(OffsetDateTime.MIN)));
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         List<LinkResponse> links = linkService.listAll(1L);
@@ -44,7 +44,7 @@ public class LinkServiceTest {
     public void noChatAddTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/some/some"))))
+        when(linkRepository.getOrCreate(new Link().setUrl("https://github.com/some/some")))
             .thenThrow(new NotFoundException("There is no such chat",
                 "The bot is not available until the /start command. Enter it to start working with the bot" ));
         try {
@@ -75,7 +75,7 @@ public class LinkServiceTest {
     @Test
     public void linkAlreadyExistAddTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/anpol84/test"))))
+        when(linkRepository.getOrCreate(new Link().setUrl("https://github.com/anpol84/test")))
             .thenThrow(new BadRequestException("The link already exists", "It is not possible to add the link again"));
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
@@ -95,11 +95,11 @@ public class LinkServiceTest {
     @Test
     public void correctAddTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/anpol84/test"))))
-            .thenReturn(new Link().setId(1L).setUrl(URI.create("https://github.com/anpol84/test"))
+        when(linkRepository.getOrCreate(new Link().setUrl("https://github.com/anpol84/test")))
+            .thenReturn(new Link().setId(1L).setUrl("https://github.com/anpol84/test")
                 .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX));
         when(linkRepository.insert(any(), any()))
-            .thenReturn(new Link().setId(1L).setUrl(URI.create("https://github.com/anpol84/test"))
+            .thenReturn(new Link().setId(1L).setUrl("https://github.com/anpol84/test")
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX));
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
@@ -118,7 +118,7 @@ public class LinkServiceTest {
     @Test
     public void badDataRemoveTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/some/some"))))
+        when(linkRepository.getOrCreate(new Link().setUrl("https://github.com/some/some")))
             .thenThrow(new RuntimeException());
         LinkService linkService = new LinkService(linkRepository, linkHolder);
         try {

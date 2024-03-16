@@ -7,19 +7,28 @@ import edu.java.repository.jdbc.JdbcChatRepository;
 import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 
 public class JdbcChatRepositoryTest extends IntegrationTest {
 
-    private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
+    private final JdbcLinkRepository linkRepository;
+    private final JdbcChatRepository chatRepository;
+
+
+    public JdbcChatRepositoryTest() {
+        this.linkRepository = new JdbcLinkRepository(jdbcTemplate);
+        this.chatRepository = new JdbcChatRepository(jdbcTemplate);
+    }
 
     @Test
     void addTest() {
@@ -41,11 +50,11 @@ public class JdbcChatRepositoryTest extends IntegrationTest {
         assertEquals(0, chats.size());
         chatRepository.add(new Chat().setId(3L));
         chatRepository.add(new Chat().setId(4L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://example.ru")));
+        Link link = linkRepository.getOrCreate(new Link().setUrl("http://example.ru"));
         linkRepository.insert(new Chat().setId(3L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://example2.ru")));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://example2.ru"));
         linkRepository.insert(new Chat().setId(3L), link2);
-        Link link3 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://example2.ru")));
+        Link link3 = linkRepository.getOrCreate(new Link().setUrl("http://example2.ru"));
         linkRepository.insert(new Chat().setId(4L), link3);
         chatRepository.remove(3L);
         List<Link> links = linkRepository.findAll();

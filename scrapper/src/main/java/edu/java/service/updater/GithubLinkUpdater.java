@@ -8,6 +8,7 @@ import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.serviceDto.GithubInfo;
 import edu.java.utils.LinkUtils;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GithubLinkUpdater implements LinkUpdater {
     private final GithubWebClient githubWebClient;
-    private final LinkRepository jooqLinkRepository;
+    private final LinkRepository linkRepository;
     private final BotWebClient botWebClient;
     private final static String URL = "https://github.com/";
 
@@ -32,16 +33,16 @@ public class GithubLinkUpdater implements LinkUpdater {
         GithubResponse githubResponse =
             githubWebClient.fetchLatestRepositoryActivity(info.getRepository(), info.getAccount());
         if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
-            List<Long> chatIds = jooqLinkRepository.findChatIdsByUrl(link.getUrl().toString());
+            List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest()
                     .setId(link.getId())
-                    .setUrl(link.getUrl())
+                    .setUrl(URI.create(link.getUrl()))
                     .setDescription(getDescription(githubResponse))
                     .setTgChatIds(chatIds));
             } catch (Exception ignored) {
             }
-            jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
+            linkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
             return 1;
         }
         return 0;
@@ -67,7 +68,7 @@ public class GithubLinkUpdater implements LinkUpdater {
         if (githubResponse == null) {
             return;
         }
-        jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
+        linkRepository.setLastApiUpdate(link.getUrl().toString(), githubResponse.getCreatedAt());
     }
 
     private String getDescription(GithubResponse githubResponse) {
