@@ -4,6 +4,7 @@ import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.repository.jooq.tables.records.LinkRecord;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +20,17 @@ public class JooqLinkRepository implements LinkRepository {
 
     @Override
     public Link getOrCreate(Link link) {
-        LinkRecord linkRecord = dsl.selectFrom(LINK).where(LINK.URL.eq(link.getUrl())).fetchOne();
+        LinkRecord linkRecord = dsl.selectFrom(LINK).where(LINK.URL.eq(link.getUrl().toString())).fetchOne();
         if (linkRecord == null) {
             linkRecord = dsl.insertInto(LINK, LINK.URL, LINK.UPDATE_AT)
-                .values(link.getUrl(), OffsetDateTime.now())
+                .values(link.getUrl().toString(), OffsetDateTime.now())
                 .returning(LINK.ID)
                 .fetchOne();
-            linkRecord.setUrl(link.getUrl());
+            linkRecord.setUrl(link.getUrl().toString());
             linkRecord.setUpdateAt(OffsetDateTime.now());
         }
         return new Link()
-            .setUrl(linkRecord.getUrl())
+            .setUrl(URI.create(linkRecord.getUrl()))
             .setId(linkRecord.getId())
             .setUpdateAt(linkRecord.getUpdateAt())
             .setLastApiUpdate(linkRecord.getLastApiUpdate());
@@ -64,7 +65,7 @@ public class JooqLinkRepository implements LinkRepository {
             ))
             .fetch()
             .map(linkRecord -> new Link()
-                .setUrl(linkRecord.getUrl())
+                .setUrl(URI.create(linkRecord.getUrl()))
                 .setId(linkRecord.getId())
                 .setUpdateAt(linkRecord.getUpdateAt())
                 .setLastApiUpdate(linkRecord.getLastApiUpdate()));
@@ -75,7 +76,7 @@ public class JooqLinkRepository implements LinkRepository {
         return dsl.selectFrom(LINK)
             .fetch()
             .map(linkRecord -> new Link()
-                .setUrl(linkRecord.getUrl())
+                .setUrl(URI.create(linkRecord.getUrl()))
                 .setId(linkRecord.getId())
                 .setUpdateAt(linkRecord.getUpdateAt())
                 .setLastApiUpdate(linkRecord.getLastApiUpdate()));
@@ -89,7 +90,7 @@ public class JooqLinkRepository implements LinkRepository {
             .fetch()
             .map(linkRecord -> new Link()
                 .setId(linkRecord.getId())
-                .setUrl(linkRecord.getUrl())
+                .setUrl(URI.create(linkRecord.getUrl()))
                 .setUpdateAt(linkRecord.getUpdateAt())
                 .setLastApiUpdate(linkRecord.getLastApiUpdate()));
     }
@@ -103,7 +104,7 @@ public class JooqLinkRepository implements LinkRepository {
             .map(linkRecord ->
                 new Link()
                     .setId(linkRecord.getValue(LINK.ID))
-                    .setUrl(linkRecord.getValue(LINK.URL))
+                    .setUrl(URI.create(linkRecord.getValue(LINK.URL)))
                     .setUpdateAt(linkRecord.getValue(LINK.UPDATE_AT))
                     .setLastApiUpdate(linkRecord.getValue(LINK.LAST_API_UPDATE)))
             .orElse(null);

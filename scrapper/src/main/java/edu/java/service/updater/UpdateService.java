@@ -23,13 +23,13 @@ public class UpdateService {
         List<Link> links = linkRepository.findByOldestUpdates(COUNT_UPDATES);
         int count = 0;
         for (Link link : links) {
-            String domain = LinkUtils.extractDomainFromUrl(link.getUrl());
+            String domain = LinkUtils.extractDomainFromUrl(link.getUrl().toString());
             LinkUpdater linkUpdater = linkHolder.getUpdaterByDomain(domain);
-            if (linkUpdater.support(link.getUrl())) {
+            if (linkUpdater.support(link.getUrl().toString())) {
                 count += linkUpdater.process(link);
             }
 
-            linkRepository.setUpdateAt(link.getUrl(), OffsetDateTime.now(ZoneOffset.UTC));
+            linkRepository.setUpdateAt(link.getUrl().toString(), OffsetDateTime.now(ZoneOffset.UTC));
         }
         return count;
     }

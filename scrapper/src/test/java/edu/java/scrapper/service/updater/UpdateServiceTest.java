@@ -24,15 +24,15 @@ public class UpdateServiceTest {
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkUpdater linkUpdater = mock(GithubLinkUpdater.class);
         when(linkRepository.findByOldestUpdates(5))
-            .thenReturn(List.of(new Link().setId(1L).setUrl("1").setUpdateAt(OffsetDateTime.MAX)
+            .thenReturn(List.of(new Link().setId(1L).setUrl(URI.create("1")).setUpdateAt(OffsetDateTime.MAX)
                     .setLastApiUpdate(OffsetDateTime.MAX.minusDays(2)),
-                new Link().setId(2L).setUrl("2").setUpdateAt(OffsetDateTime.MAX)
+                new Link().setId(2L).setUrl(URI.create("2")).setUpdateAt(OffsetDateTime.MAX)
                     .setLastApiUpdate(OffsetDateTime.MAX.minusDays(2)),
-                new Link().setId(3L).setUrl("3").setUpdateAt(OffsetDateTime.MAX)
+                new Link().setId(3L).setUrl(URI.create("3")).setUpdateAt(OffsetDateTime.MAX)
                     .setLastApiUpdate(OffsetDateTime.MAX.minusDays(2)),
-                new Link().setId(4L).setUrl("4").setUpdateAt(OffsetDateTime.MAX)
+                new Link().setId(4L).setUrl(URI.create("4")).setUpdateAt(OffsetDateTime.MAX)
                     .setLastApiUpdate(OffsetDateTime.MAX.minusDays(2)),
-                new Link().setId(5L).setUrl("5").setUpdateAt(OffsetDateTime.MAX)
+                new Link().setId(5L).setUrl(URI.create("5")).setUpdateAt(OffsetDateTime.MAX)
                     .setLastApiUpdate(OffsetDateTime.MAX.minusDays(2))));
         when(linkHolder.getUpdaterByDomain(any())).thenReturn(linkUpdater);
         when(linkUpdater.support(any())).thenReturn(true);

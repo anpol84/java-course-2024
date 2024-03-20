@@ -8,7 +8,6 @@ import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.serviceDto.GithubInfo;
 import edu.java.utils.LinkUtils;
-import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class GithubLinkUpdater implements LinkUpdater {
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest()
                     .setId(link.getId())
-                    .setUrl(URI.create(link.getUrl()))
+                    .setUrl(link.getUrl())
                     .setDescription(getDescription(githubResponse))
                     .setTgChatIds(chatIds));
             } catch (Exception ignored) {

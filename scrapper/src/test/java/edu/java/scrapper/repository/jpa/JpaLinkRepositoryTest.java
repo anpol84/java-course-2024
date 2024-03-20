@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     @Test
     void addTest() {
         chatRepository.add(new Chat().setId(1L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
         List<Link> links = linkRepository.findAll();
         assertEquals(1, links.size());
@@ -51,24 +52,24 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     @Test
     void removeTest() {
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(2L), link);
         linkRepository.remove(2L, "http://test.ru");
         List<Link> links = linkRepository.findAll();
         assertEquals(1, links.size());
 
         chatRepository.add(new Chat().setId(3L));
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
-        Link link3 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link3 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(2L), link3);
-        Link link4 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link4 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(3L), link4);
         linkRepository.remove(2L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         List<Link> links2 = linkRepository.findAll();
         assertEquals(2, links2.size());
-        assertEquals("http://test.ru", links2.get(0).getUrl());
+        assertEquals("http://test.ru", links2.get(0).getUrl().toString());
 
         linkRepository.remove(3L, "http://test2.ru");
         chatRepository.remove(2L);
@@ -81,13 +82,13 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     void findAllByChatIdTest(){
         chatRepository.add(new Chat().setId(1L));
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
         List<Link> links = linkRepository.findAllByChatId(1L);
         assertEquals(1, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         chatRepository.remove(1L);
@@ -99,14 +100,14 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     void findAllTest(){
         chatRepository.add(new Chat().setId(1L));
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
         List<Link> links = linkRepository.findAll();
         assertEquals(2, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
-        assertEquals("http://test2.ru", links.get(1).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
+        assertEquals("http://test2.ru", links.get(1).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         chatRepository.remove(1L);
@@ -119,11 +120,11 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     void findByChatIdAndUrlTest(){
         chatRepository.add(new Chat().setId(1L));
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
-        Link link3 = linkRepository.getOrCreate(new Link().setUrl("http://test3.ru"));
+        Link link3 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test3.ru")));
         linkRepository.insert(new Chat().setId(1L), link3);
 
         Link linkResp = linkRepository.findByChatIdAndUrl(1L, "http://test3.ru");
@@ -142,17 +143,17 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     void findByLastActivityTest(){
         chatRepository.add(new Chat().setId(1L));
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
-        Link link3 = linkRepository.getOrCreate(new Link().setUrl("http://test3.ru"));
+        Link link3 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test3.ru")));
         linkRepository.insert(new Chat().setId(1L), link3);
 
         List<Link> links = linkRepository.findByOldestUpdates(2);
         assertEquals(2, links.size());
-        assertEquals("http://test.ru", links.get(0).getUrl());
-        assertEquals("http://test2.ru", links.get(1).getUrl());
+        assertEquals("http://test.ru", links.get(0).getUrl().toString());
+        assertEquals("http://test2.ru", links.get(1).getUrl().toString());
         linkRepository.remove(1L, "http://test.ru");
         linkRepository.remove(2L, "http://test2.ru");
         linkRepository.remove(1L, "http://test3.ru");
@@ -165,7 +166,7 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     @Test
     void setUpdateAtTest(){
         chatRepository.add(new Chat().setId(1L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
         linkRepository.setUpdateAt("http://test.ru", OffsetDateTime.now());
         Link linkResp = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
@@ -177,7 +178,7 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     @Test
     void setLastApiUpdateTest(){
         chatRepository.add(new Chat().setId(1L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
         Link linkResp2 = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
         System.out.println(linkResp2);
@@ -194,9 +195,9 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     void findChatIdsByUrlTest(){
         chatRepository.add(new Chat().setId(1L));
         chatRepository.add(new Chat().setId(2L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(2L), link2);
         List<Long> ids = linkRepository.findChatIdsByUrl("http://test.ru");
         assertEquals(2, ids.size());
@@ -212,9 +213,9 @@ public class JpaLinkRepositoryTest extends IntegrationTest {
     @Test
     void deleteUnusedLinksTest(){
         chatRepository.add(new Chat().setId(1L));
-        Link link = linkRepository.getOrCreate(new Link().setUrl("http://test.ru"));
+        Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
-        Link link2 = linkRepository.getOrCreate(new Link().setUrl("http://test2.ru"));
+        Link link2 = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test2.ru")));
         linkRepository.insert(new Chat().setId(1L), link2);
         chatRepository.remove(1L);
         linkRepository.deleteUnusedLinks();

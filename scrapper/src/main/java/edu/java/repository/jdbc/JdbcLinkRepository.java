@@ -3,6 +3,7 @@ package edu.java.repository.jdbc;
 import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
+import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
@@ -13,6 +14,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+
 
 @RequiredArgsConstructor
 public class JdbcLinkRepository implements LinkRepository {
@@ -30,7 +32,7 @@ public class JdbcLinkRepository implements LinkRepository {
         try {
             addedLink = jdbcTemplate.queryForObject("SELECT * FROM link WHERE url = ?", (rs, rowNum) ->
                 new Link().setId(rs.getLong("id"))
-                    .setUrl(rs.getString(URL))
+                    .setUrl(URI.create(rs.getString(URL)))
                     .setUpdateAt(rs.getObject(UPDATE_AT, OffsetDateTime.class))
                     .setLastApiUpdate(rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)), link.getUrl().toString());
         } catch (EmptyResultDataAccessException ignored) {
@@ -81,7 +83,7 @@ public class JdbcLinkRepository implements LinkRepository {
             (SELECT link_id FROM chat_link WHERE chat_id = ?)
             """, (rs, rowNum) ->
             new Link().setId(rs.getLong("id"))
-                .setUrl(rs.getString(URL))
+                .setUrl(URI.create(rs.getString(URL)))
                 .setUpdateAt(rs.getObject(UPDATE_AT, OffsetDateTime.class))
                 .setLastApiUpdate(rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)), chatId);
     }
@@ -90,7 +92,7 @@ public class JdbcLinkRepository implements LinkRepository {
     public List<Link> findAll() {
         return jdbcTemplate.query("SELECT * FROM link", (rs, rowNum) ->
             new Link().setId(rs.getLong("id"))
-                .setUrl(rs.getString(URL))
+                .setUrl(URI.create(rs.getString(URL)))
                 .setUpdateAt(rs.getObject(UPDATE_AT, OffsetDateTime.class))
                 .setLastApiUpdate(rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)));
     }
@@ -99,7 +101,7 @@ public class JdbcLinkRepository implements LinkRepository {
     public List<Link> findByOldestUpdates(int count) {
         return jdbcTemplate.query("SELECT * FROM link ORDER BY update_at LIMIT ?", (rs, rowNum) ->
             new Link().setId(rs.getLong("id"))
-                .setUrl(rs.getString(URL))
+                .setUrl(URI.create(rs.getString(URL)))
                 .setUpdateAt(rs.getObject(UPDATE_AT, OffsetDateTime.class))
                 .setLastApiUpdate(rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)), count);
     }
@@ -111,7 +113,7 @@ public class JdbcLinkRepository implements LinkRepository {
             ON c.link_id = l.id WHERE c.chat_id = ?
              AND l.url = ?
              """, (rs, rowNum) -> new Link().setId(rs.getLong(LINK_ID))
-            .setUrl(rs.getString(URL))
+            .setUrl(URI.create(rs.getString(URL)))
             .setUpdateAt(rs.getObject(UPDATE_AT, OffsetDateTime.class))
             .setLastApiUpdate(rs.getObject(LAST_API_UPDATE, OffsetDateTime.class)), chatId, url);
         return links.isEmpty() ? null : links.get(0);

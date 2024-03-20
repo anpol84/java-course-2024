@@ -3,6 +3,7 @@ package edu.java.repository.jpa;
 import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class JpaLinkRepository implements LinkRepository {
 
     @Override
     public Link getOrCreate(Link link) {
-        Link addedLink = jpaLinkRepositoryInterface.findByUrl(link.getUrl().toString());
+        Link addedLink = jpaLinkRepositoryInterface.findByUrl(link.getUrl());
         if (addedLink == null) {
             addedLink = new Link().setUrl(link.getUrl()).setUpdateAt(OffsetDateTime.now());
             addedLink = jpaLinkRepositoryInterface.save(addedLink);
@@ -35,7 +36,7 @@ public class JpaLinkRepository implements LinkRepository {
 
     @Override
     public List<Link> findAllByChatId(Long chatId) {
-        return jpaLinkRepositoryInterface.findAllByChatId(chatId);
+        return jpaLinkRepositoryInterface.findAllByChatsId(chatId);
     }
 
     @Override
@@ -50,26 +51,26 @@ public class JpaLinkRepository implements LinkRepository {
 
     @Override
     public Link findByChatIdAndUrl(Long chatId, String url) {
-        return jpaLinkRepositoryInterface.findAllByChatIdAndUrl(chatId, url);
+        return jpaLinkRepositoryInterface.findByChatsIdAndUrl(chatId, URI.create(url));
     }
 
     @Override
     public void setUpdateAt(String url, OffsetDateTime time) {
-        Link link = jpaLinkRepositoryInterface.findByUrl(url);
+        Link link = jpaLinkRepositoryInterface.findByUrl(URI.create(url));
         link.setUpdateAt(time);
         jpaLinkRepositoryInterface.save(link);
     }
 
     @Override
     public void setLastApiUpdate(String url, OffsetDateTime time) {
-        Link link = jpaLinkRepositoryInterface.findByUrl(url);
+        Link link = jpaLinkRepositoryInterface.findByUrl(URI.create(url));
         link.setLastApiUpdate(time);
         jpaLinkRepositoryInterface.save(link);
     }
 
     @Override
     public List<Long> findChatIdsByUrl(String url) {
-        return jpaLinkRepositoryInterface.findChatIdsByUrl(url);
+        return jpaLinkRepositoryInterface.findChatsIdByUrl(url);
     }
 
     @Override

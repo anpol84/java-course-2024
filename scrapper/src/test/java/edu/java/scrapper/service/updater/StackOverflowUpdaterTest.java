@@ -28,7 +28,7 @@ public class StackOverflowUpdaterTest {
 
     @Test
     public void processTest(){
-        Link link = new Link().setId(1L).setUrl("https://stackoverflow.com/questions/123")
+        Link link = new Link().setId(1L).setUrl(URI.create("https://stackoverflow.com/questions/123"))
             .setUpdateAt(OffsetDateTime.MIN).setLastApiUpdate(OffsetDateTime.MAX.minusDays(2));
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
@@ -36,7 +36,7 @@ public class StackOverflowUpdaterTest {
         when(stackOverflowWebClient.fetchLatestAnswer(123L))
             .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
                 .setLastActivityDate(OffsetDateTime.MAX));
-        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
+        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
         when(botWebClient.sendUpdate(any())).thenReturn("Обновление обработано");
         StackOverflowLinkUpdater stackOverflowLinkUpdater =
             new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
@@ -46,7 +46,7 @@ public class StackOverflowUpdaterTest {
 
     @Test
     public void noProcessTest(){
-        Link link = new Link().setId(1L).setUrl("https://stackoverflow.com/questions/123")
+        Link link = new Link().setId(1L).setUrl(URI.create("https://stackoverflow.com/questions/123"))
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX);
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
@@ -54,7 +54,7 @@ public class StackOverflowUpdaterTest {
         when(stackOverflowWebClient.fetchLatestAnswer(123L))
             .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
                 .setLastActivityDate(OffsetDateTime.MIN));
-        when(linkRepository.findChatIdsByUrl(link.getUrl())).thenReturn(List.of(1L));
+        when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
         StackOverflowLinkUpdater stackOverflowLinkUpdater =
             new StackOverflowLinkUpdater(linkRepository, stackOverflowWebClient,botWebClient);
         int count = stackOverflowLinkUpdater.process(link);

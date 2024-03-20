@@ -7,7 +7,6 @@ import edu.java.clientDto.StackOverflowResponse;
 import edu.java.model.Link;
 import edu.java.repository.LinkRepository;
 import edu.java.utils.LinkUtils;
-import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest()
                     .setId(link.getId())
-                    .setUrl(URI.create(link.getUrl()))
+                    .setUrl(link.getUrl())
                     .setDescription(getDescription(stackOverflowResponse))
                     .setTgChatIds(chatIds));
             } catch (Exception ignored) {

@@ -39,7 +39,7 @@ public class LinkService {
             throw new BadRequestException("Bad link", "This link is not supported");
         }
         try {
-            Link link = linkRepository.getOrCreate(new Link().setUrl(url.toString()));
+            Link link = linkRepository.getOrCreate(new Link().setUrl(url));
             link = linkRepository.insert(new Chat().setId(tgChatId), link);
             if (link.getLastApiUpdate() == null) {
                 String domain = LinkUtils.extractDomainFromUrl(url.toString());
@@ -68,7 +68,7 @@ public class LinkService {
         }
         return mapToLinkResponse(new Link()
             .setId(tgChatId)
-            .setUrl(url.toString())
+            .setUrl(url)
             .setUpdateAt(OffsetDateTime.MIN)
             .setLastApiUpdate(OffsetDateTime.MAX));
     }
@@ -81,7 +81,7 @@ public class LinkService {
         try {
             return new LinkResponse()
                 .setId(link.getId())
-                .setUrl(URI.create(link.getUrl()));
+                .setUrl(link.getUrl());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

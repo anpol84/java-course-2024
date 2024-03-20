@@ -1,23 +1,34 @@
 package edu.java.model;
 
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import java.net.URI;
 import java.time.OffsetDateTime;
-import lombok.Data;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 
-@Data
+
 @Accessors(chain = true)
 @Entity
+@Setter
+@Getter
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String url;
+
+    @Convert(converter = URIToStringConverter.class)
+    private URI url;
 
     @Column(name = "update_at")
     private OffsetDateTime updateAt;
@@ -25,5 +36,20 @@ public class Link {
     @Column(name = "last_api_update")
     private OffsetDateTime lastApiUpdate;
 
+    @ManyToMany(mappedBy = "links")
+    private List<Chat> chats;
 
+    @Converter(autoApply = true) static
+    class URIToStringConverter implements AttributeConverter<URI, String> {
+
+        @Override
+        public String convertToDatabaseColumn(URI attribute) {
+            return attribute.toString();
+        }
+
+        @Override
+        public URI convertToEntityAttribute(String dbData) {
+            return URI.create(dbData);
+        }
+    }
 }
