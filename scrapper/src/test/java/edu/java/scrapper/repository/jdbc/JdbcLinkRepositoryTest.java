@@ -6,16 +6,25 @@ import edu.java.repository.jdbc.JdbcChatRepository;
 import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-
+@SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class JdbcLinkRepositoryTest extends IntegrationTest {
 
-    private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
+    private final JdbcLinkRepository linkRepository;
+    private final JdbcChatRepository chatRepository;
+
+    public JdbcLinkRepositoryTest() {
+        this.linkRepository = new JdbcLinkRepository(jdbcTemplate);
+        this.chatRepository = new JdbcChatRepository(jdbcTemplate);
+    }
 
     @Test
     void addTest() {

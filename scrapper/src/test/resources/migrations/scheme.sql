@@ -11,8 +11,8 @@ CREATE TABLE chat (
 CREATE TABLE link (
                       id BIGSERIAL,
                       url VARCHAR(255) NOT NULL UNIQUE ,
-                      update_at TIMESTAMP,
-                      last_api_update TIMESTAMP DEFAULT NULL,
+                      update_at TIMESTAMP WITH TIME ZONE,
+                      last_api_update TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                       PRIMARY KEY (id)
 );
 

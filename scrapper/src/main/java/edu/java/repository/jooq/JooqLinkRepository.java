@@ -10,11 +10,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
-import org.springframework.stereotype.Repository;
 import static edu.java.repository.jooq.Tables.CHAT_LINK;
 import static edu.java.repository.jooq.Tables.LINK;
 
-@Repository
+
 @RequiredArgsConstructor
 public class JooqLinkRepository implements LinkRepository {
     private final DSLContext dsl;
@@ -30,7 +29,11 @@ public class JooqLinkRepository implements LinkRepository {
             linkRecord.setUrl(link.getUrl().toString());
             linkRecord.setUpdateAt(OffsetDateTime.now());
         }
-        return linkRecord.into(Link.class);
+        return new Link()
+            .setUrl(URI.create(linkRecord.getUrl()))
+            .setId(linkRecord.getId())
+            .setUpdateAt(linkRecord.getUpdateAt())
+            .setLastApiUpdate(linkRecord.getLastApiUpdate());
     }
 
     @Override
@@ -60,13 +63,23 @@ public class JooqLinkRepository implements LinkRepository {
                 .where(CHAT_LINK.CHAT_ID.eq(chatId))
                 .fetch()
             ))
-            .fetchInto(Link.class);
+            .fetch()
+            .map(linkRecord -> new Link()
+                .setUrl(URI.create(linkRecord.getUrl()))
+                .setId(linkRecord.getId())
+                .setUpdateAt(linkRecord.getUpdateAt())
+                .setLastApiUpdate(linkRecord.getLastApiUpdate()));
     }
 
     @Override
     public List<Link> findAll() {
         return dsl.selectFrom(LINK)
-            .fetchInto(Link.class);
+            .fetch()
+            .map(linkRecord -> new Link()
+                .setUrl(URI.create(linkRecord.getUrl()))
+                .setId(linkRecord.getId())
+                .setUpdateAt(linkRecord.getUpdateAt())
+                .setLastApiUpdate(linkRecord.getLastApiUpdate()));
     }
 
     @Override

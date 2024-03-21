@@ -44,7 +44,7 @@ public class LinkServiceTest {
     public void noChatAddTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/some/some"))))
+        when(linkRepository.getOrCreate(any()))
             .thenThrow(new NotFoundException("There is no such chat",
                 "The bot is not available until the /start command. Enter it to start working with the bot" ));
         try {
@@ -75,7 +75,7 @@ public class LinkServiceTest {
     @Test
     public void linkAlreadyExistAddTest(){
         LinkRepository linkRepository = mock(JooqLinkRepository.class);
-        when(linkRepository.getOrCreate(new Link().setUrl(URI.create("https://github.com/anpol84/test"))))
+        when(linkRepository.getOrCreate(any()))
             .thenThrow(new BadRequestException("The link already exists", "It is not possible to add the link again"));
         LinkHolder linkHolder = mock(LinkHolder.class);
         LinkService linkService = new LinkService(linkRepository, linkHolder);

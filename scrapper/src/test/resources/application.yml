@@ -30,7 +30,6 @@ spring:
 server:
   port: 8080
 
-
 api:
   bot:
     baseurl: http://localhost:8090
@@ -38,7 +37,7 @@ api:
     baseurl: https://api.stackexchange.com/2.3/
   github:
     baseurl: https://api.github.com/
-    token: ${GITHUB_TOKEN}
+    token: 123
 
 springdoc:
   swagger-ui:

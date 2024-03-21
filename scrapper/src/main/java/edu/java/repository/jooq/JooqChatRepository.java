@@ -8,10 +8,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
-import org.springframework.stereotype.Repository;
 
 
-@Repository
 @RequiredArgsConstructor
 public class JooqChatRepository implements ChatRepository {
     private final DSLContext dslContext;

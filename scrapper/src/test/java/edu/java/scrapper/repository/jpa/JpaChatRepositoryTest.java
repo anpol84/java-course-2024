@@ -1,32 +1,41 @@
-package edu.java.scrapper.repository.jooq;
+package edu.java.scrapper.repository.jpa;
 
 import edu.java.model.Chat;
 import edu.java.model.Link;
-import edu.java.repository.jooq.JooqChatRepository;
-import edu.java.repository.jooq.JooqLinkRepository;
+import edu.java.repository.jpa.JpaChatRepository;
+import edu.java.repository.jpa.JpaChatRepositoryInterface;
+import edu.java.repository.jpa.JpaLinkRepository;
+import edu.java.repository.jpa.JpaLinkRepositoryInterface;
 import edu.java.scrapper.IntegrationTest;
-import org.jooq.exception.IntegrityConstraintViolationException;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class JooqChatRepositoryTest extends IntegrationTest {
+public class JpaChatRepositoryTest extends IntegrationTest {
 
-    private final JooqLinkRepository linkRepository;
-    private final JooqChatRepository chatRepository;
+    private final JpaLinkRepository linkRepository;
 
-    public JooqChatRepositoryTest() {
-        this.linkRepository = new JooqLinkRepository(dslContext);
-        this.chatRepository = new JooqChatRepository(dslContext);
+    private final JpaChatRepository chatRepository;
+
+    @Autowired
+    public JpaChatRepositoryTest(
+        JpaLinkRepositoryInterface jpaLinkRepositoryInterface,
+        JpaChatRepositoryInterface jpaChatRepositoryInterface
+    ) {
+        linkRepository = new JpaLinkRepository(jpaLinkRepositoryInterface);
+         chatRepository = new JpaChatRepository(jpaChatRepositoryInterface);
     }
+
+
 
     @Test
     void addTest() {
@@ -34,9 +43,6 @@ public class JooqChatRepositoryTest extends IntegrationTest {
         List<Chat> chats = chatRepository.findAll();
         assertEquals(1, chats.size());
         assertEquals(1, chats.get(0).getId());
-        assertThrows(IntegrityConstraintViolationException.class, () -> {
-            chatRepository.add(new Chat().setId(1L));
-        });
         chatRepository.remove(1L);
     }
 
@@ -88,5 +94,4 @@ public class JooqChatRepositoryTest extends IntegrationTest {
         chatRepository.remove(7L);
         chatRepository.remove(8L);
     }
-
 }

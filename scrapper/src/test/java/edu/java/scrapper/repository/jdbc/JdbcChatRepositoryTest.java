@@ -1,6 +1,5 @@
 package edu.java.scrapper.repository.jdbc;
 
-
 import edu.java.model.Chat;
 import edu.java.model.Link;
 import edu.java.repository.jdbc.JdbcChatRepository;
@@ -18,8 +17,13 @@ import java.util.Optional;
 
 public class JdbcChatRepositoryTest extends IntegrationTest {
 
-    private final JdbcLinkRepository linkRepository = new JdbcLinkRepository(jdbcTemplate);
-    private final JdbcChatRepository chatRepository = new JdbcChatRepository(jdbcTemplate);
+    private final JdbcLinkRepository linkRepository;
+    private final JdbcChatRepository chatRepository;
+
+    public JdbcChatRepositoryTest() {
+        this.linkRepository = new JdbcLinkRepository(jdbcTemplate);
+        this.chatRepository = new JdbcChatRepository(jdbcTemplate);
+    }
 
     @Test
     void addTest() {

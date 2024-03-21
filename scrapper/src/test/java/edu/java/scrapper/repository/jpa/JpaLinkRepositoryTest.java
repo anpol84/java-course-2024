@@ -1,36 +1,42 @@
-package edu.java.scrapper.repository.jooq;
+package edu.java.scrapper.repository.jpa;
 
 import edu.java.model.Chat;
 import edu.java.model.Link;
-import edu.java.repository.jooq.JooqChatRepository;
-import edu.java.repository.jooq.JooqLinkRepository;
+import edu.java.repository.jpa.JpaChatRepository;
+import edu.java.repository.jpa.JpaChatRepositoryInterface;
+import edu.java.repository.jpa.JpaLinkRepository;
+import edu.java.repository.jpa.JpaLinkRepositoryInterface;
 import edu.java.scrapper.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class JooqLinkRepositoryTest extends IntegrationTest {
+public class JpaLinkRepositoryTest extends IntegrationTest {
+    private final JpaLinkRepository linkRepository;
 
-    private final JooqLinkRepository linkRepository;
-    private final JooqChatRepository chatRepository;
+    private final JpaChatRepository chatRepository;
 
-    public JooqLinkRepositoryTest() {
-        this.linkRepository = new JooqLinkRepository(dslContext);
-        this.chatRepository = new JooqChatRepository(dslContext);
+    @Autowired
+    public JpaLinkRepositoryTest(
+        JpaLinkRepositoryInterface jpaLinkRepositoryInterface,
+        JpaChatRepositoryInterface jpaChatRepositoryInterface
+    ) {
+        linkRepository = new JpaLinkRepository(jpaLinkRepositoryInterface);
+        chatRepository = new JpaChatRepository(jpaChatRepositoryInterface);
     }
+
 
     @Test
     void addTest() {
         chatRepository.add(new Chat().setId(1L));
         Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
-        System.out.println(link);
         linkRepository.insert(new Chat().setId(1L), link);
         List<Link> links = linkRepository.findAll();
         assertEquals(1, links.size());
@@ -174,8 +180,11 @@ public class JooqLinkRepositoryTest extends IntegrationTest {
         chatRepository.add(new Chat().setId(1L));
         Link link = linkRepository.getOrCreate(new Link().setUrl(URI.create("http://test.ru")));
         linkRepository.insert(new Chat().setId(1L), link);
+        Link linkResp2 = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
+        System.out.println(linkResp2);
         linkRepository.setLastApiUpdate("http://test.ru", OffsetDateTime.now());
         Link linkResp = linkRepository.findByChatIdAndUrl(1L, "http://test.ru");
+        System.out.println(linkResp);
         assertEquals(OffsetDateTime.now().getHour(), linkResp.getLastApiUpdate().getHour());
         linkRepository.remove(1L, "http://test.ru");
         chatRepository.remove(1L);
@@ -213,4 +222,5 @@ public class JooqLinkRepositoryTest extends IntegrationTest {
         List<Link> links = linkRepository.findAll();
         assertEquals(0, links.size());
     }
+
 }

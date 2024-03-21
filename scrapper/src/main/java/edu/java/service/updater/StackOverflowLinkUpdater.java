@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class StackOverflowLinkUpdater implements LinkUpdater {
-    private final LinkRepository jooqLinkRepository;
+    private final LinkRepository linkRepository;
     private final StackOverflowWebClient stackOverflowWebClient;
     private final BotWebClient botWebClient;
     private final static int MAXIMUM_BODY_SIZE = 20;
@@ -33,7 +33,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
             return 0;
         }
         if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
-            List<Long> chatIds = jooqLinkRepository.findChatIdsByUrl(link.getUrl().toString());
+            List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
                 botWebClient.sendUpdate(new LinkUpdateRequest()
                     .setId(link.getId())
@@ -43,7 +43,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
             } catch (Exception ignored) {
 
             }
-            jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
+            linkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
             return 1;
         }
         return 0;
@@ -66,7 +66,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         long number = Long.parseLong(questionNumber);
         StackOverflowResponse stackOverflowResponse =
             stackOverflowWebClient.fetchLatestAnswer(number);
-        jooqLinkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
+        linkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
     }
 
     private String getDescription(StackOverflowResponse stackOverflowResponse) {
