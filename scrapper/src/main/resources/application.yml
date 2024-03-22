@@ -4,7 +4,7 @@ app:
     interval: 5000
     unusedLinksInterval: 86400000
     force-check-delay: 10s
-  database-access-type: jpa
+  database-access-type: jdbc
 
 spring:
   liquibase:
@@ -34,9 +34,12 @@ server:
 api:
   bot:
     baseurl: http://localhost:8090
+    retryPolicy: linear
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
+    retryPolicy: linear
   github:
+    retryPolicy: linear
     baseurl: https://api.github.com/
     token: ${GITHUB_TOKEN}
 

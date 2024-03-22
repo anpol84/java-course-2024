@@ -33,14 +33,14 @@ public class StartCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.registerChat(123456789L)).thenReturn("Good");
+        when(scrapperWebClient.registerChatWithRetry(123456789L)).thenReturn("Good");
         StartCommand startCommand = new StartCommand(scrapperWebClient);
 
         SendMessage sendMessage = startCommand.handle(update);
 
         assertEquals(sendMessage.getParameters().get("text"),"Bot has started");
 
-        when(scrapperWebClient.registerChat(123456789L))
+        when(scrapperWebClient.registerChatWithRetry(123456789L))
             .thenThrow(new ApiErrorException(
                 new ApiErrorResponse().setDescription("bad").setCode("400").setExceptionName("name")
                     .setExceptionMessage("message").setStacktrace(List.of("1", "2"))));

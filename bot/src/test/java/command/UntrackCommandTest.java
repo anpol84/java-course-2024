@@ -38,7 +38,7 @@ public class UntrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
-        when(scrapperWebClient.removeLink("http://stackoverflow.com/questions", 123456789L))
+        when(scrapperWebClient.removeLinkWithRetry("http://stackoverflow.com/questions", 123456789L))
             .thenThrow(new ApiErrorException(new ApiErrorResponse().setDescription("bad").setCode("400")
                 .setExceptionName("name").setExceptionMessage("message").setStacktrace(List.of("1", "2"))));
 
@@ -61,7 +61,7 @@ public class UntrackCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         when(message.text()).thenReturn("/untrack http://stackoverflow.com/questions");
-        when(scrapperWebClient.removeLink("http://stackoverflow.com/questions", 123456789L))
+        when(scrapperWebClient.removeLinkWithRetry("http://stackoverflow.com/questions", 123456789L))
             .thenReturn(new LinkResponse().setId(1L).setUrl(new URI("http://stackoverflow.com/questions")));
         UntrackCommand untrackCommand = new UntrackCommand(scrapperWebClient);
 

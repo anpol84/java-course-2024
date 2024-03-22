@@ -57,5 +57,4 @@ public class ScrapperController {
         return linkService.remove(chatId, request.getLink());
     }
 
-
 }

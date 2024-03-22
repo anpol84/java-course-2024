@@ -4,28 +4,51 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.java.clientDto.GithubResponse;
+import edu.java.configuration.RetryConfiguration;
+import io.github.resilience4j.retry.Retry;
+import jakarta.annotation.PostConstruct;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
 public class GithubWebClient implements GithubClient {
 
     private final WebClient webClient;
+    private final Set<HttpStatus> retryStatuses = new HashSet<>();
 
     private final static String DEFAULT_URL = "https://api.github.com/";
+    private Retry retry;
 
-    private String token;
+    @Value(value = "${api.github.retryPolicy}")
+    private String retryPolicy;
+
+    private final String token;
 
     public GithubWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
         this.token = "";
+        addStatusCodes();
     }
 
     public GithubWebClient(String baseUrl, String token) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
         this.token = token;
+        addStatusCodes();
+    }
+
+    private void addStatusCodes() {
+        retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PostConstruct
+    private void configRetry() {
+        retry = RetryConfiguration.config(retryPolicy, retryStatuses);
     }
 
     @Override
@@ -44,6 +67,11 @@ public class GithubWebClient implements GithubClient {
             .retrieve()
             .bodyToMono(String.class)
             .mapNotNull(this::parseResponse).block();
+    }
+
+    public GithubResponse fetchLatestRepositoryActivityWithRetry(String repositoryName, String authorName) {
+        return Retry.decorateSupplier(retry, () -> fetchLatestRepositoryActivity(repositoryName, authorName))
+            .get();
     }
 
     private GithubResponse parseResponse(String json) {

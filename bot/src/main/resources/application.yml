@@ -21,6 +21,7 @@ server:
 api:
   scrapper:
     baseurl: http://localhost:8080
+    retryPolicy: linear
 
 springdoc:
   swagger-ui:

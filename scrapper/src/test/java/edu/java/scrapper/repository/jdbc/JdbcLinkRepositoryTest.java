@@ -14,8 +14,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+
 public class JdbcLinkRepositoryTest extends IntegrationTest {
 
     private final JdbcLinkRepository linkRepository;
