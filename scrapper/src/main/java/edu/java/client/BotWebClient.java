@@ -6,7 +6,6 @@ import edu.java.exception.ApiErrorException;
 import edu.java.serviceDto.ApiErrorResponse;
 import io.github.resilience4j.retry.Retry;
 import jakarta.annotation.PostConstruct;
-import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -20,45 +19,29 @@ public class BotWebClient {
     private final WebClient webClient;
     private final static String DEFAULT_URL = "http://localhost:8090";
 
-    private final Set<HttpStatus> retryStatuses = new HashSet<>();
     private Retry retry;
     @Value(value = "${api.bot.retryPolicy}")
     private RetryPolicy retryPolicy;
-    @Value(value = "${api.bot.constantRetry}")
-    private int constantRetryCount;
-
-    @Value(value = "${api.bot.linearRetry}")
-    private int linearRetryCount;
-    @Value(value = "${api.bot.exponentialRetry}")
-    private int exponentialRetryCount;
-
+    @Value(value = "${api.bot.retryCount}")
+    private int retryCount;
     @Value(value = "${api.bot.linearArg}")
     private int linearFuncArg;
+    @Value("#{'${api.bot.codes}'.split(',')}")
+    private Set<HttpStatus> retryStatuses;
 
     public BotWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
-        addStatusCodes();
     }
 
     public BotWebClient(String baseUrl) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
-        addStatusCodes();
-    }
-
-    private void addStatusCodes() {
-        retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
-        retryStatuses.add(HttpStatus.BAD_GATEWAY);
-        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
-        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
-        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
-            .setConstantRetryCount(constantRetryCount)
-            .setExponentialRetryCount(exponentialRetryCount)
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO()
             .setLinearFuncArg(linearFuncArg)
+            .setRetryCount(retryCount)
             .setRetryPolicy(retryPolicy)
             .setRetryStatuses(retryStatuses);
         retry = RetryConfiguration.config(retryConfigDTO);

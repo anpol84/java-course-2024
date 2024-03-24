@@ -35,27 +35,26 @@ api:
   bot:
     baseurl: http://localhost:8090
     retryPolicy: linear
-    constantRetry: 4
-    linearRetry: 3
-    exponentialRetry: 6
+    retryCount: 5
     linearArg: 2
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
     retryPolicy: linear
-    constantRetry: 2
-    linearRetry: 5
-    exponentialRetry: 2
+    retryCount: 4
     linearArg: 4
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
   github:
     retryPolicy: linear
     baseurl: https://api.github.com/
     token: ${GITHUB_TOKEN}
-    constantRetry: 5
-    linearRetry: 4
-    exponentialRetry: 2
+    retryCount: 3
     linearArg: 4
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
 
 springdoc:
   swagger-ui:
     path: /swagger-ui
 
+bucket:
+  queryCount: 30

@@ -12,10 +12,7 @@ public class RetryConfigDTO {
 
     private RetryPolicy retryPolicy;
 
-    private int constantRetryCount;
-
-    private int linearRetryCount;
-    private int exponentialRetryCount;
+    private int retryCount;
 
     private int linearFuncArg;
 

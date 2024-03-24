@@ -9,7 +9,6 @@ import io.github.resilience4j.retry.Retry;
 import jakarta.annotation.PostConstruct;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,51 +19,34 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class GithubWebClient implements GithubClient {
 
     private final WebClient webClient;
-    private final Set<HttpStatus> retryStatuses = new HashSet<>();
 
     private final static String DEFAULT_URL = "https://api.github.com/";
     private Retry retry;
 
     @Value(value = "${api.github.retryPolicy}")
     private RetryPolicy retryPolicy;
-    @Value(value = "${api.github.constantRetry}")
-    private int constantRetryCount;
-
-    @Value(value = "${api.github.linearRetry}")
-    private int linearRetryCount;
-    @Value(value = "${api.github.exponentialRetry}")
-    private int exponentialRetryCount;
-
+    @Value(value = "${api.github.retryCount}")
+    private int retryCount;
     @Value(value = "${api.github.linearArg}")
     private int linearFuncArg;
+    @Value("#{'${api.github.codes}'.split(',')}")
+    private Set<HttpStatus> retryStatuses;
 
     private final String token;
 
     public GithubWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
         this.token = "";
-        addStatusCodes();
     }
 
     public GithubWebClient(String baseUrl, String token) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
         this.token = token;
-        addStatusCodes();
-    }
-
-    private void addStatusCodes() {
-        retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
-        retryStatuses.add(HttpStatus.BAD_GATEWAY);
-        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
-        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
-        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
-            .setConstantRetryCount(constantRetryCount)
-            .setExponentialRetryCount(exponentialRetryCount)
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setRetryCount(retryCount)
             .setLinearFuncArg(linearFuncArg)
             .setRetryPolicy(retryPolicy)
             .setRetryStatuses(retryStatuses);

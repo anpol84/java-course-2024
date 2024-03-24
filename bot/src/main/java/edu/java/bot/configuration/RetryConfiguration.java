@@ -27,7 +27,7 @@ public class RetryConfiguration {
 
     private static RetryConfig constantRetryConfig(RetryConfigDTO retryConfigDTO) {
         return RetryConfig.<WebClientResponseException>custom()
-            .maxAttempts(retryConfigDTO.getConstantRetryCount())
+            .maxAttempts(retryConfigDTO.getRetryCount())
             .waitDuration(Duration.ofSeconds(2))
             .retryOnResult(response -> retryConfigDTO.getRetryStatuses().contains(response.getStatusCode()))
             .build();
@@ -35,7 +35,7 @@ public class RetryConfiguration {
 
     private static RetryConfig linearRetryConfig(RetryConfigDTO retryConfigDTO) {
         return RetryConfig.<WebClientResponseException>custom()
-            .maxAttempts(retryConfigDTO.getLinearRetryCount())
+            .maxAttempts(retryConfigDTO.getRetryCount())
             .intervalFunction(IntervalFunction.of(Duration.ofSeconds(retryConfigDTO.getLinearFuncArg()),
                 attempt -> retryConfigDTO.getLinearFuncArg() + 2 * attempt))
             .retryOnResult(response -> retryConfigDTO.getRetryStatuses().contains(response.getStatusCode()))
@@ -44,7 +44,7 @@ public class RetryConfiguration {
 
     private static RetryConfig exponentialRetryConfig(RetryConfigDTO retryConfigDTO) {
          return RetryConfig.<WebClientResponseException>custom()
-            .maxAttempts(retryConfigDTO.getExponentialRetryCount())
+            .maxAttempts(retryConfigDTO.getRetryCount())
             .intervalFunction(IntervalFunction.ofExponentialBackoff(IntervalFunction.DEFAULT_INITIAL_INTERVAL,
                 IntervalFunction.DEFAULT_MULTIPLIER))
             .retryOnResult(response -> retryConfigDTO.getRetryStatuses().contains(response.getStatusCode()))

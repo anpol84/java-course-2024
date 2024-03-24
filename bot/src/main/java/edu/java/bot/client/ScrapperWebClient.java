@@ -13,7 +13,6 @@ import io.github.resilience4j.retry.Retry;
 import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -28,50 +27,34 @@ public class ScrapperWebClient {
     private final WebClient webClient;
     private final static String DEFAULT_URL = "http://localhost:8080";
 
-    private final Set<HttpStatus> retryStatuses = new HashSet<>();
     private Retry retry;
     private final static String PATH_TO_CHAT = "tg-chat/{id}";
     private final static String PATH_TO_LINK = "/links";
     private final static String HEADER_NAME = "Tg-Chat-Id";
+
     @Value(value = "${api.scrapper.retryPolicy}")
     private RetryPolicy retryPolicy;
-    @Value(value = "${api.scrapper.constantRetry}")
-    private int constantRetryCount;
 
-    @Value(value = "${api.scrapper.linearRetry}")
-    private int linearRetryCount;
-    @Value(value = "${api.scrapper.exponentialRetry}")
-    private int exponentialRetryCount;
-
+    @Value(value = "${api.scrapper.retryCount}")
+    private int retryCount;
     @Value(value = "${api.scrapper.linearArg}")
     private int linearFuncArg;
-
+    @Value("#{'${api.scrapper.codes}'.split(',')}")
+    private Set<HttpStatus> retryStatuses;
 
 
     public ScrapperWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
-        addStatusCodes();
     }
 
     public ScrapperWebClient(String baseUrl) {
 
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
-        addStatusCodes();
-    }
-
-    private void addStatusCodes() {
-        retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
-        retryStatuses.add(HttpStatus.BAD_GATEWAY);
-        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
-        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
-        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
-            .setConstantRetryCount(constantRetryCount)
-            .setExponentialRetryCount(exponentialRetryCount)
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setRetryCount(retryCount)
             .setLinearFuncArg(linearFuncArg)
             .setRetryPolicy(retryPolicy)
             .setRetryStatuses(retryStatuses);
