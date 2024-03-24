@@ -21,10 +21,21 @@ public class StackOverflowWebClient implements StackOverflowClient {
     private final WebClient webClient;
     private final static String DEFAULT_URL = "https://api.stackexchange.com/2.3/";
 
-    @Value(value = "${api.stackoverflow.retryPolicy}")
-    private String retryPolicy;
+
     private final Set<HttpStatus> retryStatuses = new HashSet<>();
     private Retry retry;
+    @Value(value = "${api.stackoverflow.retryPolicy}")
+    private RetryPolicy retryPolicy;
+    @Value(value = "${api.stackoverflow.constantRetry}")
+    private int constantRetryCount;
+
+    @Value(value = "${api.stackoverflow.linearRetry}")
+    private int linearRetryCount;
+    @Value(value = "${api.stackoverflow.exponentialRetry}")
+    private int exponentialRetryCount;
+
+    @Value(value = "${api.stackoverflow.linearArg}")
+    private int linearFuncArg;
 
     public StackOverflowWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
@@ -38,11 +49,21 @@ public class StackOverflowWebClient implements StackOverflowClient {
 
     private void addStatusCodes() {
         retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
+        retryStatuses.add(HttpStatus.BAD_GATEWAY);
+        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
+        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
+        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        retry = RetryConfiguration.config(retryPolicy, retryStatuses);
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
+            .setConstantRetryCount(constantRetryCount)
+            .setExponentialRetryCount(exponentialRetryCount)
+            .setLinearFuncArg(linearFuncArg)
+            .setRetryPolicy(retryPolicy)
+            .setRetryStatuses(retryStatuses);
+        retry = RetryConfiguration.config(retryConfigDTO);
     }
 
     @Override

@@ -20,6 +20,20 @@ public class BotWebClient {
     private final WebClient webClient;
     private final static String DEFAULT_URL = "http://localhost:8090";
 
+    private final Set<HttpStatus> retryStatuses = new HashSet<>();
+    private Retry retry;
+    @Value(value = "${api.bot.retryPolicy}")
+    private RetryPolicy retryPolicy;
+    @Value(value = "${api.bot.constantRetry}")
+    private int constantRetryCount;
+
+    @Value(value = "${api.bot.linearRetry}")
+    private int linearRetryCount;
+    @Value(value = "${api.bot.exponentialRetry}")
+    private int exponentialRetryCount;
+
+    @Value(value = "${api.bot.linearArg}")
+    private int linearFuncArg;
 
     public BotWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
@@ -31,18 +45,23 @@ public class BotWebClient {
         addStatusCodes();
     }
 
-    @Value(value = "${api.bot.retryPolicy}")
-    private String retryPolicy;
-    private final Set<HttpStatus> retryStatuses = new HashSet<>();
-    private Retry retry;
-
     private void addStatusCodes() {
         retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
+        retryStatuses.add(HttpStatus.BAD_GATEWAY);
+        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
+        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
+        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        retry = RetryConfiguration.config(retryPolicy, retryStatuses);
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
+            .setConstantRetryCount(constantRetryCount)
+            .setExponentialRetryCount(exponentialRetryCount)
+            .setLinearFuncArg(linearFuncArg)
+            .setRetryPolicy(retryPolicy)
+            .setRetryStatuses(retryStatuses);
+        retry = RetryConfiguration.config(retryConfigDTO);
     }
 
 

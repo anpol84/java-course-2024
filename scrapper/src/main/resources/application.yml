@@ -35,13 +35,25 @@ api:
   bot:
     baseurl: http://localhost:8090
     retryPolicy: linear
+    constantRetry: 4
+    linearRetry: 3
+    exponentialRetry: 6
+    linearArg: 2
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
     retryPolicy: linear
+    constantRetry: 2
+    linearRetry: 5
+    exponentialRetry: 2
+    linearArg: 4
   github:
     retryPolicy: linear
     baseurl: https://api.github.com/
     token: ${GITHUB_TOKEN}
+    constantRetry: 5
+    linearRetry: 4
+    exponentialRetry: 2
+    linearArg: 4
 
 springdoc:
   swagger-ui:

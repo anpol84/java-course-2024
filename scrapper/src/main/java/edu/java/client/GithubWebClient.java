@@ -26,7 +26,17 @@ public class GithubWebClient implements GithubClient {
     private Retry retry;
 
     @Value(value = "${api.github.retryPolicy}")
-    private String retryPolicy;
+    private RetryPolicy retryPolicy;
+    @Value(value = "${api.github.constantRetry}")
+    private int constantRetryCount;
+
+    @Value(value = "${api.github.linearRetry}")
+    private int linearRetryCount;
+    @Value(value = "${api.github.exponentialRetry}")
+    private int exponentialRetryCount;
+
+    @Value(value = "${api.github.linearArg}")
+    private int linearFuncArg;
 
     private final String token;
 
@@ -44,11 +54,21 @@ public class GithubWebClient implements GithubClient {
 
     private void addStatusCodes() {
         retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
+        retryStatuses.add(HttpStatus.BAD_GATEWAY);
+        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
+        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
+        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        retry = RetryConfiguration.config(retryPolicy, retryStatuses);
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
+            .setConstantRetryCount(constantRetryCount)
+            .setExponentialRetryCount(exponentialRetryCount)
+            .setLinearFuncArg(linearFuncArg)
+            .setRetryPolicy(retryPolicy)
+            .setRetryStatuses(retryStatuses);
+        retry = RetryConfiguration.config(retryConfigDTO);
     }
 
     @Override

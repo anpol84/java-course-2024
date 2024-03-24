@@ -1,6 +1,6 @@
-package edu.java.configuration;
+package edu.java.bot.configuration;
 
-import edu.java.client.RetryConfigDTO;
+import edu.java.bot.client.RetryConfigDTO;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
@@ -13,6 +13,7 @@ public class RetryConfiguration {
     private RetryConfiguration() {
 
     }
+
 
     public static Retry config(RetryConfigDTO retryConfigDTO) {
         RetryConfig config = switch (retryConfigDTO.getRetryPolicy()) {
@@ -42,7 +43,7 @@ public class RetryConfiguration {
     }
 
     private static RetryConfig exponentialRetryConfig(RetryConfigDTO retryConfigDTO) {
-        return RetryConfig.<WebClientResponseException>custom()
+         return RetryConfig.<WebClientResponseException>custom()
             .maxAttempts(retryConfigDTO.getExponentialRetryCount())
             .intervalFunction(IntervalFunction.ofExponentialBackoff(IntervalFunction.DEFAULT_INITIAL_INTERVAL,
                 IntervalFunction.DEFAULT_MULTIPLIER))

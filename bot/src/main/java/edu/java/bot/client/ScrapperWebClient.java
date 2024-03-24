@@ -5,16 +5,14 @@ import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.clientDto.ListLinksResponse;
 import edu.java.bot.clientDto.RemoveLinkRequest;
+import edu.java.bot.configuration.RetryConfiguration;
 import edu.java.bot.exception.ApiErrorException;
 import edu.java.bot.exception.NotValidLinkException;
 import edu.java.bot.utils.UrlUtils;
-import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,23 +21,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 
 public class ScrapperWebClient {
     private final WebClient webClient;
-
     private final static String DEFAULT_URL = "http://localhost:8080";
-    @Value(value = "${api.scrapper.retryPolicy}")
-    private String retryPolicy;
+
     private final Set<HttpStatus> retryStatuses = new HashSet<>();
     private Retry retry;
-    private final static int RETRY_COUNT = 3;
-    private final static int LINEAR_FUNC_ARG = 3;
     private final static String PATH_TO_CHAT = "tg-chat/{id}";
     private final static String PATH_TO_LINK = "/links";
     private final static String HEADER_NAME = "Tg-Chat-Id";
+    @Value(value = "${api.scrapper.retryPolicy}")
+    private RetryPolicy retryPolicy;
+    @Value(value = "${api.scrapper.constantRetry}")
+    private int constantRetryCount;
+
+    @Value(value = "${api.scrapper.linearRetry}")
+    private int linearRetryCount;
+    @Value(value = "${api.scrapper.exponentialRetry}")
+    private int exponentialRetryCount;
+
+    @Value(value = "${api.scrapper.linearArg}")
+    private int linearFuncArg;
+
+
 
     public ScrapperWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
@@ -54,35 +61,21 @@ public class ScrapperWebClient {
 
     private void addStatusCodes() {
         retryStatuses.add(HttpStatus.INTERNAL_SERVER_ERROR);
+        retryStatuses.add(HttpStatus.BAD_GATEWAY);
+        retryStatuses.add(HttpStatus.INSUFFICIENT_STORAGE);
+        retryStatuses.add(HttpStatus.SERVICE_UNAVAILABLE);
+        retryStatuses.add(HttpStatus.GATEWAY_TIMEOUT);
     }
 
     @PostConstruct
     private void configRetry() {
-        RetryConfig config;
-        if (retryPolicy.equals("constant")) {
-            config = RetryConfig.<WebClientResponseException>custom()
-                .maxAttempts(RETRY_COUNT)
-                .waitDuration(Duration.ofSeconds(2))
-                .retryOnResult(response -> retryStatuses.contains(response.getStatusCode()))
-                .build();
-        } else if (retryPolicy.equals("linear")) {
-            config = RetryConfig.<WebClientResponseException>custom()
-                .maxAttempts(RETRY_COUNT)
-                .intervalFunction(IntervalFunction.of(Duration.ofSeconds(LINEAR_FUNC_ARG),
-                    attempt -> LINEAR_FUNC_ARG + 2 * attempt))
-                .retryOnResult(response -> retryStatuses.contains(response.getStatusCode()))
-                .build();
-        } else if (retryPolicy.equals("exponential")) {
-            config = RetryConfig.<WebClientResponseException>custom()
-                .maxAttempts(RETRY_COUNT)
-                .intervalFunction(IntervalFunction.ofExponentialBackoff(IntervalFunction.DEFAULT_INITIAL_INTERVAL,
-                    IntervalFunction.DEFAULT_MULTIPLIER))
-                .retryOnResult(response -> retryStatuses.contains(response.getStatusCode()))
-                .build();
-        } else {
-            config = RetryConfig.ofDefaults();
-        }
-        retry = Retry.of("my-retry", config);
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setLinearRetryCount(linearRetryCount)
+            .setConstantRetryCount(constantRetryCount)
+            .setExponentialRetryCount(exponentialRetryCount)
+            .setLinearFuncArg(linearFuncArg)
+            .setRetryPolicy(retryPolicy)
+            .setRetryStatuses(retryStatuses);
+        retry = RetryConfiguration.config(retryConfigDTO);
     }
 
     public String registerChat(Long id) {
