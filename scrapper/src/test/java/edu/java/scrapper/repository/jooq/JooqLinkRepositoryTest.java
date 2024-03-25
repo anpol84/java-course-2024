@@ -14,8 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+
 public class JooqLinkRepositoryTest extends IntegrationTest {
 
     private final JooqLinkRepository linkRepository;

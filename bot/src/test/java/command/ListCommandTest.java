@@ -31,7 +31,7 @@ public class ListCommandTest {
         Chat chat = mock(Chat.class);
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn( new ListLinksResponse().setLinks(new ArrayList<>())
+        when(scrapperWebClient.getLinksWithRetry(123456789L)).thenReturn( new ListLinksResponse().setLinks(new ArrayList<>())
             .setSize(0));
         ListCommand listCommand = new ListCommand(scrapperWebClient);
 
@@ -49,7 +49,7 @@ public class ListCommandTest {
         when(message.chat()).thenReturn(chat);
         when(chat.id()).thenReturn(123456789L);
         ScrapperWebClient scrapperWebClient = mock(ScrapperWebClient.class);
-        when(scrapperWebClient.getLinks(123456789L)).thenReturn(new ListLinksResponse().setLinks(
+        when(scrapperWebClient.getLinksWithRetry(123456789L)).thenReturn(new ListLinksResponse().setLinks(
             List.of(new LinkResponse().setId(1L).setUrl(new URI("url1")), new LinkResponse().setId(2L)
                 .setUrl(new URI("url2")))).setSize(2));
         ListCommand listCommand = new ListCommand(scrapperWebClient);

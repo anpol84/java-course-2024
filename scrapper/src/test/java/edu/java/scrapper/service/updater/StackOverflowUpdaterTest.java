@@ -33,7 +33,7 @@ public class StackOverflowUpdaterTest {
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
-        when(stackOverflowWebClient.fetchLatestAnswer(123L))
+        when(stackOverflowWebClient.fetchLatestAnswerWithRetry(123L))
             .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
                 .setLastActivityDate(OffsetDateTime.MAX));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
@@ -51,7 +51,7 @@ public class StackOverflowUpdaterTest {
         StackOverflowWebClient stackOverflowWebClient = mock(StackOverflowWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
-        when(stackOverflowWebClient.fetchLatestAnswer(123L))
+        when(stackOverflowWebClient.fetchLatestAnswerWithRetry(123L))
             .thenReturn(new StackOverflowResponse().setAnswerId(1L).setQuestionId(1L)
                 .setLastActivityDate(OffsetDateTime.MIN));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));

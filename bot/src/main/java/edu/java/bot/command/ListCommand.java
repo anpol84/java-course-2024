@@ -24,7 +24,7 @@ public class ListCommand implements Command {
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
         try {
-            ListLinksResponse response = scrapperWebClient.getLinks(chatId);
+            ListLinksResponse response = scrapperWebClient.getLinksWithRetry(chatId);
             if (response.getSize() == 0) {
                 return new SendMessage(chatId, NO_LINK_MESSAGE);
             }

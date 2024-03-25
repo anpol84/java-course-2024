@@ -4,7 +4,7 @@ app:
     interval: 5000
     unusedLinksInterval: 86400000
     force-check-delay: 10s
-  database-access-type: jpa
+  database-access-type: jdbc
 
 spring:
   liquibase:
@@ -34,13 +34,27 @@ server:
 api:
   bot:
     baseurl: http://localhost:8090
+    retryPolicy: linear
+    retryCount: 5
+    linearArg: 2
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
+    retryPolicy: linear
+    retryCount: 4
+    linearArg: 4
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
   github:
+    retryPolicy: linear
     baseurl: https://api.github.com/
     token: ${GITHUB_TOKEN}
+    retryCount: 3
+    linearArg: 4
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
 
 springdoc:
   swagger-ui:
     path: /swagger-ui
 
+bucket:
+  queryCount: 30

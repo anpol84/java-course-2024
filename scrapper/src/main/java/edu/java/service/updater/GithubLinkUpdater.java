@@ -30,11 +30,11 @@ public class GithubLinkUpdater implements LinkUpdater {
             return 0;
         }
         GithubResponse githubResponse =
-            githubWebClient.fetchLatestRepositoryActivity(info.getRepository(), info.getAccount());
+            githubWebClient.fetchLatestRepositoryActivityWithRetry(info.getRepository(), info.getAccount());
         if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdate(new LinkUpdateRequest()
+                botWebClient.sendUpdateWithRetry(new LinkUpdateRequest()
                     .setId(link.getId())
                     .setUrl(link.getUrl())
                     .setDescription(getDescription(githubResponse))
@@ -63,7 +63,7 @@ public class GithubLinkUpdater implements LinkUpdater {
     public void setLastUpdate(Link link) {
         GithubInfo info = LinkUtils.extractGithubInfoFromUrl(link.getUrl().toString());
         GithubResponse githubResponse =
-            githubWebClient.fetchLatestRepositoryActivity(info.getRepository(), info.getAccount());
+            githubWebClient.fetchLatestRepositoryActivityWithRetry(info.getRepository(), info.getAccount());
         if (githubResponse == null) {
             return;
         }

@@ -28,14 +28,14 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         String questionNumber = LinkUtils.extractStackOverflowInfoFromUrl(link.getUrl().toString());
         long number = Long.parseLong(questionNumber);
         StackOverflowResponse stackOverflowResponse =
-            stackOverflowWebClient.fetchLatestAnswer(number);
+            stackOverflowWebClient.fetchLatestAnswerWithRetry(number);
         if (link.getLastApiUpdate() == null) {
             return 0;
         }
         if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdate(new LinkUpdateRequest()
+                botWebClient.sendUpdateWithRetry(new LinkUpdateRequest()
                     .setId(link.getId())
                     .setUrl(link.getUrl())
                     .setDescription(getDescription(stackOverflowResponse))
@@ -65,7 +65,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         String questionNumber = LinkUtils.extractStackOverflowInfoFromUrl(link.getUrl().toString());
         long number = Long.parseLong(questionNumber);
         StackOverflowResponse stackOverflowResponse =
-            stackOverflowWebClient.fetchLatestAnswer(number);
+            stackOverflowWebClient.fetchLatestAnswerWithRetry(number);
         linkRepository.setLastApiUpdate(link.getUrl().toString(), stackOverflowResponse.getLastActivityDate());
     }
 

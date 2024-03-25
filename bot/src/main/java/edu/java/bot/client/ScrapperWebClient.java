@@ -5,12 +5,18 @@ import edu.java.bot.clientDto.ApiErrorResponse;
 import edu.java.bot.clientDto.LinkResponse;
 import edu.java.bot.clientDto.ListLinksResponse;
 import edu.java.bot.clientDto.RemoveLinkRequest;
+import edu.java.bot.configuration.RetryConfiguration;
 import edu.java.bot.exception.ApiErrorException;
 import edu.java.bot.exception.NotValidLinkException;
 import edu.java.bot.utils.UrlUtils;
+import io.github.resilience4j.retry.Retry;
+import jakarta.annotation.PostConstruct;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,12 +25,23 @@ import reactor.core.publisher.Mono;
 
 public class ScrapperWebClient {
     private final WebClient webClient;
-
     private final static String DEFAULT_URL = "http://localhost:8080";
 
+    private Retry retry;
     private final static String PATH_TO_CHAT = "tg-chat/{id}";
     private final static String PATH_TO_LINK = "/links";
     private final static String HEADER_NAME = "Tg-Chat-Id";
+
+    @Value(value = "${api.scrapper.retryPolicy}")
+    private RetryPolicy retryPolicy;
+
+    @Value(value = "${api.scrapper.retryCount}")
+    private int retryCount;
+    @Value(value = "${api.scrapper.linearArg}")
+    private int linearFuncArg;
+    @Value("#{'${api.scrapper.codes}'.split(',')}")
+    private Set<HttpStatus> retryStatuses;
+
 
     public ScrapperWebClient() {
         this.webClient = WebClient.builder().baseUrl(DEFAULT_URL).build();
@@ -33,6 +50,15 @@ public class ScrapperWebClient {
     public ScrapperWebClient(String baseUrl) {
 
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
+    }
+
+    @PostConstruct
+    private void configRetry() {
+        RetryConfigDTO retryConfigDTO = new RetryConfigDTO().setRetryCount(retryCount)
+            .setLinearFuncArg(linearFuncArg)
+            .setRetryPolicy(retryPolicy)
+            .setRetryStatuses(retryStatuses);
+        retry = RetryConfiguration.config(retryConfigDTO);
     }
 
     public String registerChat(Long id) {
@@ -46,6 +72,11 @@ public class ScrapperWebClient {
             .block();
     }
 
+    public String registerChatWithRetry(Long id) {
+        return Retry.decorateSupplier(retry, () -> registerChat(id))
+            .get();
+    }
+
     public String deleteChat(Long id) {
         return webClient.delete()
             .uri(uriBuilder -> uriBuilder.path(PATH_TO_CHAT).build(id))
@@ -55,6 +86,11 @@ public class ScrapperWebClient {
             )
             .bodyToMono(String.class)
             .block();
+    }
+
+    public String deleteChatWithRetry(Long id) {
+        return Retry.decorateSupplier(retry, () -> deleteChat(id))
+            .get();
     }
 
     public ListLinksResponse getLinks(Long id) {
@@ -67,6 +103,11 @@ public class ScrapperWebClient {
             )
             .bodyToMono(ListLinksResponse.class)
             .block();
+    }
+
+    public ListLinksResponse getLinksWithRetry(Long id) {
+        return Retry.decorateSupplier(retry, () -> getLinks(id))
+            .get();
     }
 
     public LinkResponse addLink(String text, Long id) throws URISyntaxException {
@@ -84,6 +125,18 @@ public class ScrapperWebClient {
             .block();
     }
 
+    public LinkResponse addLinkWithRetry(String text, Long id) {
+        return Retry.decorateSupplier(retry, () -> {
+                try {
+                    return addLink(text, id);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .get();
+    }
+
+
     public LinkResponse removeLink(String text, Long id) throws URISyntaxException {
         checkLink(text);
         RemoveLinkRequest request = new RemoveLinkRequest().setLink(new URI(text));
@@ -97,6 +150,17 @@ public class ScrapperWebClient {
             )
             .bodyToMono(LinkResponse.class)
             .block();
+    }
+
+    public LinkResponse removeLinkWithRetry(String text, Long id) {
+        return Retry.decorateSupplier(retry, () -> {
+                try {
+                    return removeLink(text, id);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .get();
     }
 
     private void checkLink(String link) {

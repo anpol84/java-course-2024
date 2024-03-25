@@ -1,7 +1,6 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN}
 
-
 spring:
   main:
     allow-circular-references: true
@@ -17,11 +16,17 @@ spring:
 server:
   port: 8090
 
-
 api:
   scrapper:
     baseurl: http://localhost:8080
+    retryPolicy: linear
+    retryCount: 3
+    linearArg: 3
+    codes: INTERNAL_SERVER_ERROR, BAD_GATEWAY, INSUFFICIENT_STORAGE, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
 
 springdoc:
   swagger-ui:
     path: /swagger-ui
+
+bucket:
+  queryCount: 30

@@ -24,7 +24,7 @@ public class UntrackCommand implements Command {
 
         try {
             String messageText = update.message().text().split(" ")[1];
-            scrapperWebClient.removeLink(messageText, update.message().chat().id());
+            scrapperWebClient.removeLinkWithRetry(messageText, update.message().chat().id());
         } catch (ApiErrorException e) {
             return new SendMessage(update.message().chat().id(), e.getErrorResponse().getDescription());
         } catch (NotValidLinkException e) {

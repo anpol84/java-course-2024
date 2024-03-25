@@ -33,7 +33,7 @@ public class GithubLinkUpdaterTest {
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
-        when(githubWebClient.fetchLatestRepositoryActivity("some",
+        when(githubWebClient.fetchLatestRepositoryActivityWithRetry("some",
             "some")).thenReturn(
                 new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MAX));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
@@ -50,7 +50,7 @@ public class GithubLinkUpdaterTest {
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
         BotWebClient botWebClient = mock(BotWebClient.class);
-        when(githubWebClient.fetchLatestRepositoryActivity("some",
+        when(githubWebClient.fetchLatestRepositoryActivityWithRetry("some",
             "some")).thenReturn(new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MIN));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
         GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,botWebClient);
