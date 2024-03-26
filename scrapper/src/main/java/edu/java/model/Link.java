@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 
@@ -19,6 +20,7 @@ import lombok.experimental.Accessors;
 @Entity
 @Setter
 @Getter
+@ToString
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -53,8 +53,7 @@ public class JdbcLinkRepository implements LinkRepository {
             linkId = (Long) keys.get("id");
             addedLink = new Link().setId(linkId)
                 .setUrl(link.getUrl())
-                .setUpdateAt(OffsetDateTime.now())
-                .setLastApiUpdate(OffsetDateTime.MIN);
+                .setUpdateAt(OffsetDateTime.now());
         }
         return addedLink;
     }

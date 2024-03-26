@@ -1,6 +1,5 @@
 package edu.java.service.updater;
 
-import edu.java.client.BotWebClient;
 import edu.java.client.GithubWebClient;
 import edu.java.clientDto.GithubResponse;
 import edu.java.clientDto.LinkUpdateRequest;
@@ -19,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GithubLinkUpdater implements LinkUpdater {
     private final GithubWebClient githubWebClient;
     private final LinkRepository linkRepository;
-    private final BotWebClient botWebClient;
+    private final SendUpdateService sendUpdateService;
     private final static String URL = "https://github.com/";
 
     @Override
@@ -34,7 +33,7 @@ public class GithubLinkUpdater implements LinkUpdater {
         if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                botWebClient.sendUpdateWithRetry(new LinkUpdateRequest()
+                sendUpdateService.update(new LinkUpdateRequest()
                     .setId(link.getId())
                     .setUrl(link.getUrl())
                     .setDescription(getDescription(githubResponse))
@@ -46,6 +45,8 @@ public class GithubLinkUpdater implements LinkUpdater {
         }
         return 0;
     }
+
+
 
     @Override
     public boolean support(String url) {

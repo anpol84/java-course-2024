@@ -1,6 +1,6 @@
 package edu.java.bot.controller;
 
-import edu.java.bot.model.BotImpl;
+import edu.java.bot.service.ProcessMessageService;
 import edu.java.bot.serviceDto.LinkUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/updates")
 @RequiredArgsConstructor
 public class BotController {
-    private final BotImpl bot;
+
+    private final ProcessMessageService processMessageService;
 
     @PostMapping
     public String sendUpdate(@RequestBody @Valid LinkUpdateRequest linkUpdate) {
-        for (Long chat : linkUpdate.getTgChatIds()) {
-            bot.sendMessageToChat(String.valueOf(chat), linkUpdate.getDescription());
-        }
+        processMessageService.process(linkUpdate);
         return "The update has been processed";
     }
 }

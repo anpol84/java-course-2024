@@ -8,7 +8,6 @@ import edu.java.bot.exception.ApiErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-
 @Component
 @RequiredArgsConstructor
 public class ListCommand implements Command {
@@ -33,8 +32,12 @@ public class ListCommand implements Command {
             return new SendMessage(chatId, message.toString());
         } catch (ApiErrorException e) {
             return new SendMessage(chatId, e.getErrorResponse().getDescription());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public String getDescription() {
