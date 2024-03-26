@@ -1,5 +1,16 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN}
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: botMessages
+      mappings: edu.java.clientDto.LinkUpdateRequest:edu.java.bot.serviceDto.LinkUpdateRequest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topicName: botUpdates
+    badResponseTopicName: botUpdates_dlq
+
 
 spring:
   main:

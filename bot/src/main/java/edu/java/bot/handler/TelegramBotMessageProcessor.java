@@ -15,6 +15,7 @@ public class TelegramBotMessageProcessor implements MessageProcessor {
 
     @Override
     public SendMessage process(Update update) {
+
         if (update.message() != null && update.message().text() != null) {
             String commandName = update.message().text().split(" ")[0];
             Command command = commandHolder.getCommandByName(commandName);
@@ -24,5 +25,6 @@ public class TelegramBotMessageProcessor implements MessageProcessor {
             return new SendMessage(update.message().chat().id(), "Unknown command");
         }
         return null;
+
     }
 }
