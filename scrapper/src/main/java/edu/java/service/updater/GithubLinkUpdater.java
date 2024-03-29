@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GithubLinkUpdater implements LinkUpdater {
     private final GithubWebClient githubWebClient;
     private final LinkRepository linkRepository;
-    private final SendUpdateService sendUpdateService;
+    private final UpdateSender updateSender;
     private final static String URL = "https://github.com/";
 
     @Override
@@ -33,7 +33,7 @@ public class GithubLinkUpdater implements LinkUpdater {
         if (githubResponse.getCreatedAt().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                sendUpdateService.update(new LinkUpdateRequest()
+                updateSender.send(new LinkUpdateRequest()
                     .setId(link.getId())
                     .setUrl(link.getUrl())
                     .setDescription(getDescription(githubResponse))

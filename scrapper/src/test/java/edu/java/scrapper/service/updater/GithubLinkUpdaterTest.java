@@ -1,6 +1,5 @@
 package edu.java.scrapper.service.updater;
 
-import edu.java.client.BotWebClient;
 import edu.java.client.GithubWebClient;
 import edu.java.clientDto.GithubResponse;
 import edu.java.model.Link;
@@ -8,7 +7,7 @@ import edu.java.repository.LinkRepository;
 import edu.java.repository.jdbc.JdbcLinkRepository;
 import edu.java.repository.jooq.JooqLinkRepository;
 import edu.java.service.updater.GithubLinkUpdater;
-import edu.java.service.updater.SendUpdateService;
+import edu.java.service.updater.UpdateSender;
 import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -33,13 +32,13 @@ public class GithubLinkUpdaterTest {
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX.minusDays(2));
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        SendUpdateService sendUpdateService = mock(SendUpdateService.class);
+        UpdateSender updateSender = mock(UpdateSender.class);
         when(githubWebClient.fetchLatestRepositoryActivityWithRetry("some",
             "some")).thenReturn(
                 new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MAX));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
-        doNothing().when(sendUpdateService).update(any());
-        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,sendUpdateService);
+        doNothing().when(updateSender).send(any());
+        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,updateSender);
         int count = githubLinkUpdater.process(link);
         assertEquals(1, count);
     }
@@ -50,20 +49,20 @@ public class GithubLinkUpdaterTest {
             .setUpdateAt(OffsetDateTime.MAX).setLastApiUpdate(OffsetDateTime.MAX);
         GithubWebClient githubWebClient = mock(GithubWebClient.class);
         LinkRepository linkRepository = mock(JdbcLinkRepository.class);
-        SendUpdateService sendUpdateService = mock(SendUpdateService.class);
+        UpdateSender updateSender = mock(UpdateSender.class);
         when(githubWebClient.fetchLatestRepositoryActivityWithRetry("some",
             "some")).thenReturn(new GithubResponse().setId(1L).setType("1").setCreatedAt(OffsetDateTime.MIN));
         when(linkRepository.findChatIdsByUrl(link.getUrl().toString())).thenReturn(List.of(1L));
-        doNothing().when(sendUpdateService).update(any());
-        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,sendUpdateService);
+        doNothing().when(updateSender).send(any());
+        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,updateSender);
         int count = githubLinkUpdater.process(link);
         assertEquals(0, count);
     }
 
     @Test
     public void supportTest(){
-        SendUpdateService sendUpdateService = mock(SendUpdateService.class);
-        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,sendUpdateService);
+        UpdateSender updateSender = mock(UpdateSender.class);
+        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,updateSender);
         boolean flag1 = githubLinkUpdater.support("123");
         assertFalse(flag1);
         boolean flag2 = githubLinkUpdater.support("https://github.com/some/some");
@@ -72,8 +71,10 @@ public class GithubLinkUpdaterTest {
 
     @Test
     public void getDomainTest(){
-        SendUpdateService sendUpdateService = mock(SendUpdateService.class);
-        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,sendUpdateService);
+        UpdateSender updateSender = mock(UpdateSender.class);
+        GithubLinkUpdater githubLinkUpdater = new GithubLinkUpdater(githubWebClient,linkRepository,updateSender);
         assertEquals("github.com", githubLinkUpdater.getDomain());
     }
+
+
 }

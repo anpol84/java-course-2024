@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StackOverflowLinkUpdater implements LinkUpdater {
     private final LinkRepository linkRepository;
     private final StackOverflowWebClient stackOverflowWebClient;
-    private final SendUpdateService sendUpdateService;
+    private final UpdateSender updateSender;
     private final static int MAXIMUM_BODY_SIZE = 20;
     private final static String URL = "https://stackoverflow.com/questions/";
 
@@ -34,7 +34,7 @@ public class StackOverflowLinkUpdater implements LinkUpdater {
         if (stackOverflowResponse.getLastActivityDate().isAfter(link.getLastApiUpdate())) {
             List<Long> chatIds = linkRepository.findChatIdsByUrl(link.getUrl().toString());
             try {
-                sendUpdateService.update(new LinkUpdateRequest()
+                updateSender.send(new LinkUpdateRequest()
                     .setId(link.getId())
                     .setUrl(link.getUrl())
                     .setDescription(getDescription(stackOverflowResponse))

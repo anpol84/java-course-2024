@@ -3,6 +3,7 @@ package edu.java.client;
 import edu.java.clientDto.LinkUpdateRequest;
 import edu.java.configuration.RetryConfiguration;
 import edu.java.exception.ApiErrorException;
+import edu.java.service.updater.UpdateSender;
 import edu.java.serviceDto.ApiErrorResponse;
 import io.github.resilience4j.retry.Retry;
 import jakarta.annotation.PostConstruct;
@@ -14,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 
-public class BotWebClient {
+public class BotWebClient implements UpdateSender {
 
     private final WebClient webClient;
     private final static String DEFAULT_URL = "http://localhost:8090";
@@ -48,7 +49,7 @@ public class BotWebClient {
     }
 
 
-    public String sendUpdate(LinkUpdateRequest request) {
+    public String sendWithoutRetry(LinkUpdateRequest request) {
         return webClient.post()
             .uri("/updates")
             .body(BodyInserters.fromValue(request))
@@ -60,8 +61,9 @@ public class BotWebClient {
             .block();
     }
 
-    public String sendUpdateWithRetry(LinkUpdateRequest request) {
-        return Retry.decorateSupplier(retry, () -> sendUpdate(request))
+    @Override
+    public void send(LinkUpdateRequest request) {
+        Retry.decorateSupplier(retry, () -> sendWithoutRetry(request))
             .get();
     }
 }

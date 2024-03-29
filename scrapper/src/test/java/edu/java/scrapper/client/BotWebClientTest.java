@@ -53,7 +53,7 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Обновление обработано")));
 
-        String response = botWebClient.sendUpdate(request);
+        String response = botWebClient.sendWithoutRetry(request);
         assertEquals(response, "Обновление обработано");
     }
 
@@ -83,7 +83,7 @@ public class BotWebClientTest {
                 .withBody(body)));
 
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> botWebClient.sendUpdate(request)).getErrorResponse();
+            () -> botWebClient.sendWithoutRetry(request)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Bad params", errorResponse.getExceptionName());
@@ -117,7 +117,7 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody("Обновление обработано")));
 
-        String response1 = botWebClient.sendUpdate(request);
+        String response1 = botWebClient.sendWithoutRetry(request);
         assertEquals(response1, "Обновление обработано");
         wireMockServer.stubFor(post(urlEqualTo("/updates"))
             .willReturn(aResponse()
@@ -125,7 +125,7 @@ public class BotWebClientTest {
                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(body)));
         ApiErrorResponse errorResponse = assertThrows(ApiErrorException.class,
-            () -> botWebClient.sendUpdate(request)).getErrorResponse();
+            () -> botWebClient.sendWithoutRetry(request)).getErrorResponse();
         assertEquals("some description", errorResponse.getDescription());
         assertEquals("400", errorResponse.getCode());
         assertEquals("Double update", errorResponse.getExceptionName());

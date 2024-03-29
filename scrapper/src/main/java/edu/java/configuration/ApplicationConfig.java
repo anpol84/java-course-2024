@@ -15,6 +15,7 @@ public record ApplicationConfig(
     Scheduler scheduler,
     @NotNull
     String databaseAccessType,
+    boolean useQueue,
 
     @NotNull
     Kafka kafka
@@ -23,7 +24,7 @@ public record ApplicationConfig(
                             @NotNull Duration unusedLinksInterval) {
     }
 
-    public record Kafka(boolean useQueue, String bootstrapServers, Producer producer,
+    public record Kafka(String bootstrapServers, Producer producer,
                         String topicName) {
         public record Producer(String keySerializer, String valueSerializer){}
     }
