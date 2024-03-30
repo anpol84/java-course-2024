@@ -1,7 +1,6 @@
 package edu.java.kafka;
 
 import edu.java.clientDto.LinkUpdateRequest;
-import edu.java.configuration.ApplicationConfig;
 import edu.java.service.updater.UpdateSender;
 import org.springframework.kafka.core.KafkaTemplate;
 
@@ -10,17 +9,14 @@ public class ScrapperQueueProducer implements UpdateSender {
 
     private final KafkaTemplate<String, LinkUpdateRequest> kafkaTemplate;
 
-    private final ApplicationConfig applicationConfig;
+    private String topicName;
 
-    public ScrapperQueueProducer(
-        KafkaTemplate<String, LinkUpdateRequest> kafkaTemplate,
-        ApplicationConfig applicationConfig
-    ) {
+    public ScrapperQueueProducer(KafkaTemplate<String, LinkUpdateRequest> kafkaTemplate, String topicName) {
         this.kafkaTemplate = kafkaTemplate;
-        this.applicationConfig = applicationConfig;
+        this.topicName = topicName;
     }
 
     public void send(LinkUpdateRequest update) {
-        kafkaTemplate.send(applicationConfig.kafka().topicName(), update);
+        kafkaTemplate.send(topicName, update);
     }
 }

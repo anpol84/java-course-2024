@@ -15,13 +15,9 @@ public class ScrapperQueueProducerTest {
     void sendTest(){
 
         KafkaTemplate<String, LinkUpdateRequest> kafkaTemplate = mock(KafkaTemplate.class);
-        ApplicationConfig applicationConfig = mock(ApplicationConfig.class);
-        ApplicationConfig.Kafka kafka = mock(ApplicationConfig.Kafka.class);
-        ScrapperQueueProducer scrapperQueueProducer = new ScrapperQueueProducer(kafkaTemplate, applicationConfig);
-        LinkUpdateRequest update = new LinkUpdateRequest();
 
-        when(applicationConfig.kafka()).thenReturn(kafka);
-        when(applicationConfig.kafka().topicName()).thenReturn("botUpdates");
+        ScrapperQueueProducer scrapperQueueProducer = new ScrapperQueueProducer(kafkaTemplate, "botUpdates");
+        LinkUpdateRequest update = new LinkUpdateRequest();
         when(kafkaTemplate.send(any(), any())).thenReturn(null);
         scrapperQueueProducer.send(update);
 
