@@ -14,10 +14,20 @@ public record ApplicationConfig(
     @NotNull
     Scheduler scheduler,
     @NotNull
-    String databaseAccessType
+    String databaseAccessType,
+    boolean useQueue,
+
+    @NotNull
+    Kafka kafka
 ) {
     public record Scheduler(boolean enable, @NotNull Duration interval, @NotNull Duration forceCheckDelay,
                             @NotNull Duration unusedLinksInterval) {
     }
+
+    public record Kafka(String bootstrapServers, Producer producer,
+                        String topicName) {
+        public record Producer(String keySerializer, String valueSerializer){}
+    }
+
 
 }

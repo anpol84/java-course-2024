@@ -5,6 +5,13 @@ app:
     unusedLinksInterval: 86400000
     force-check-delay: 10s
   database-access-type: jdbc
+  useQueue: true
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    topicName: botUpdates
 
 spring:
   liquibase:
