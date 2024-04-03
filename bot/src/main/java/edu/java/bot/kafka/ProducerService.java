@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class ProducerService {
     private final KafkaTemplate<String, LinkUpdateRequest> kafkaTemplate;
 
-    @Value(value = "${api.kafka.badResponseTopicName}")
+    @Value(value = "${app.kafka.badResponseTopicName}")
     private String badResponseTopicName;
 
     public void send(LinkUpdateRequest update) {
