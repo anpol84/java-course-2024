@@ -35,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: anpol84/java-course
+          images: anpol84/bot
 
       - name: Push Docker images to GitHub Container Registry
         run: docker push bot:latest
