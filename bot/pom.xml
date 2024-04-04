@@ -213,7 +213,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>ghcr.io/anpol84/ava-course-2024/scrapper:latest</repository>
+                    <repository>ghcr.io/anpol84/scrapper</repository>
 
                     <dockerfile>bot.Dockerfile</dockerfile>
                     <buildArgs>
