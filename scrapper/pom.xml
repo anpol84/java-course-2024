@@ -215,7 +215,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>ghcr.io/anpol84/scrapper</repository>
+                    <repository>ghcr.io/anpol84/java-course-2024/scrapper</repository>
 
                     <dockerfile>scrapper.Dockerfile</dockerfile>
                     <buildArgs>
