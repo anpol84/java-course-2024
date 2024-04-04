@@ -29,8 +29,16 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+
       - name: Push Docker images to GitHub Container Registry
-        run: docker push ghcr.io/anpol84/scrapper:latest
+        run: docker push ghcr.io/${{ github.repository }}/scrapper:latest
+
 
       - id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
