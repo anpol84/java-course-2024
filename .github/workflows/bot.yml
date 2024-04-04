@@ -40,7 +40,7 @@ jobs:
 
 
       - name: Push Docker images to GitHub Container Registry
-        run: docker push ghcr.io/anpol84/java-course-2024/bot
+        run: docker push ghcr.io/anpol84/bot
 
       - id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
