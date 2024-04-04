@@ -215,7 +215,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>scrapper</repository>
+                    <repository>ghcr.io/anpol84/scrapper</repository>
 
                     <dockerfile>scrapper.Dockerfile</dockerfile>
                     <buildArgs>

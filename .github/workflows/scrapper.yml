@@ -42,7 +42,7 @@ jobs:
 
 
       - name: Push Docker images to GitHub Container Registry
-        run: docker push scrapper:latest
+        run: docker push ghcr.io/anpol84/scrapper
 
 
       - id: jacoco
