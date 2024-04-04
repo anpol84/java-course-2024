@@ -1,7 +1,7 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN}
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: host.docker.internal:9092
     consumer:
       group-id: botMessages
       mappings: edu.java.clientDto.LinkUpdateRequest:edu.java.bot.serviceDto.LinkUpdateRequest
@@ -29,7 +29,7 @@ server:
 
 api:
   scrapper:
-    baseurl: http://localhost:8080
+    baseurl: http://host.docker.internal:8080
     retryPolicy: linear
     retryCount: 3
     linearArg: 3

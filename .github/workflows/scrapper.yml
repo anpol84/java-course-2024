@@ -26,6 +26,15 @@ jobs:
       - name: maven build
         run: mvn -pl scrapper -am package
 
+      - name: Build Docker images
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/scrapper:latest -f scrapper.Dockerfile ./../../scrapper
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push Docker images to GitHub Container Registry
+        run: docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}/scrapper:latest
+
       - id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         if: ( github.event_name != 'workflow_dispatch' )
@@ -50,6 +59,7 @@ jobs:
           cache: maven
 
       - run: mvn -pl scrapper -am checkstyle:check
+
 
   integration-test:
     name: integration tests

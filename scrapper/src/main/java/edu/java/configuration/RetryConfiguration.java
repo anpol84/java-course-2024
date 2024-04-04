@@ -28,8 +28,13 @@ public class RetryConfiguration {
         return RetryConfig.<WebClientResponseException>custom()
             .maxAttempts(retryConfigDTO.getRetryCount())
             .waitDuration(Duration.ofSeconds(2))
-            .retryOnException(response -> retryConfigDTO.getRetryStatuses().contains(
-                ((WebClientResponseException) response).getStatusCode()))
+            .retryOnException(response -> {
+                if (response instanceof WebClientResponseException) {
+                    return retryConfigDTO.getRetryStatuses().contains(
+                        ((WebClientResponseException) response).getStatusCode());
+                }
+                return false;
+            })
             .build();
     }
 
@@ -38,8 +43,13 @@ public class RetryConfiguration {
             .maxAttempts(retryConfigDTO.getRetryCount())
             .intervalFunction(IntervalFunction.of(Duration.ofSeconds(retryConfigDTO.getLinearFuncArg()),
                 attempt -> retryConfigDTO.getLinearFuncArg() + 2 * attempt))
-            .retryOnException(response -> retryConfigDTO.getRetryStatuses().contains(
-                    ((WebClientResponseException) response).getStatusCode()))
+            .retryOnException(response -> {
+                if (response instanceof WebClientResponseException) {
+                    return retryConfigDTO.getRetryStatuses().contains(
+                        ((WebClientResponseException) response).getStatusCode());
+                }
+                return false;
+            })
             .build();
     }
 
@@ -48,8 +58,13 @@ public class RetryConfiguration {
             .maxAttempts(retryConfigDTO.getRetryCount())
             .intervalFunction(IntervalFunction.ofExponentialBackoff(IntervalFunction.DEFAULT_INITIAL_INTERVAL,
                 IntervalFunction.DEFAULT_MULTIPLIER))
-            .retryOnException(response -> retryConfigDTO.getRetryStatuses().contains(
-                ((WebClientResponseException) response).getStatusCode()))
+            .retryOnException(response -> {
+                if (response instanceof WebClientResponseException) {
+                    return retryConfigDTO.getRetryStatuses().contains(
+                        ((WebClientResponseException) response).getStatusCode());
+                }
+                return false;
+            })
             .build();
     }
 
