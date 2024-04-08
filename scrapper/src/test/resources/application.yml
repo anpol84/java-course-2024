@@ -7,7 +7,7 @@ app:
   database-access-type: jdbc
   useQueue: true
   kafka:
-    bootstrap-servers: 127.0.0.1:9092
+    bootstrap-servers: host.docker.internal:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -22,7 +22,7 @@ spring:
   application:
     name: scrapper
   datasource:
-    url: jdbc:postgresql://localhost:5432/scrapper
+    url: jdbc:postgresql://host.docker.internal:5432/scrapper
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -40,7 +40,7 @@ server:
 
 api:
   bot:
-    baseurl: http://localhost:8090
+    baseurl: http://host.docker.internal:8090
   stackoverflow:
     baseurl: https://api.stackexchange.com/2.3/
   github:
